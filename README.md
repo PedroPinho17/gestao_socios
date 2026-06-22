@@ -1,3 +1,11 @@
+# Sistema de Gestão de Sócios
+
+## 📖 Sobre
+
+O **Sistema de Gestão de Sócios** é uma plataforma desenvolvida para simplificar a administração e acompanhamento de associados de organizações, associações, clubes e entidades similares.
+
+A solução permite gerir todo o ciclo de vida dos sócios, desde o registo e atualização de dados até ao controlo de quotas e criação de cartões de associado personalizados.
+
 ## ✨ Funcionalidades
 
 ### Gestão de Sócios
@@ -44,6 +52,7 @@
 ## 🎯 Objetivo
 
 Disponibilizar uma solução moderna e flexível para a gestão de associados, permitindo automatizar processos administrativos, controlar quotas e criar cartões de sócio personalizados, adaptados às necessidades e identidade visual de cada organização.
+
 
 ## 🚀 Estado do Projeto
 
