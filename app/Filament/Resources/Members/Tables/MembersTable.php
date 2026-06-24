@@ -19,7 +19,7 @@ class MembersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['quotaPlan', 'payments']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['quotaPlan.periodicidade', 'quotaPlan.tipoVencimento', 'payments']))
             ->columns([
                 TextColumn::make('numero')
                     ->label('N.º')
@@ -36,7 +36,7 @@ class MembersTable
                 TextColumn::make('quotaPlan.nome')
                     ->label('Plano')
                     ->description(fn (Member $record): ?string => $record->quotaPlan
-                        ? $record->quotaPlan->periodicidade->label().' · '.number_format((float) $record->quotaPlan->valor, 2, ',', ' ').' €'
+                        ? $record->quotaPlan->periodicidade->nome.' · '.number_format((float) $record->quotaPlan->valor, 2, ',', ' ').' €'
                         : null),
                 TextColumn::make('quota_status')
                     ->label('Pagamento')
@@ -92,7 +92,13 @@ class MembersTable
                 Action::make('cartao_pdf')
                     ->label('PDF')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->url(fn (Member $record): string => route('member.card.pdf', $record)),
+                    ->url(fn (Member $record): string => route('member.card.pdf', $record))
+                    ->openUrlInNewTab(),
+                Action::make('cartao_png')
+                    ->label('PNG')
+                    ->icon('heroicon-o-photo')
+                    ->url(fn (Member $record): string => route('member.card.png', $record))
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([

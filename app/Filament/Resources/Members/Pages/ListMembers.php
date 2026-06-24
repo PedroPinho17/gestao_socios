@@ -14,6 +14,12 @@ class ListMembers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('cartoes_zip')
+                ->label('Cartões ativos (ZIP)')
+                ->icon('heroicon-o-archive-box-arrow-down')
+                ->color('success')
+                ->url(route('reports.cards.zip'))
+                ->openUrlInNewTab(),
             Action::make('relatorio_atraso_pdf')
                 ->label('Sócios em atraso (PDF)')
                 ->icon('heroicon-o-document-text')
@@ -24,7 +30,8 @@ class ListMembers extends ListRecords
                 ->label('Sócios em atraso (Excel)')
                 ->icon('heroicon-o-table-cells')
                 ->color('gray')
-                ->url(route('reports.overdue.excel')),
+                ->url(route('reports.overdue.excel'))
+                ->openUrlInNewTab(),
             CreateAction::make(),
         ];
     }

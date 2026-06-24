@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\ClubSetting;
 use App\Models\Member;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 

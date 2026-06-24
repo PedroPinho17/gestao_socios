@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Enums\Periodicidade;
-use App\Enums\TipoVencimentoQuota;
 use App\Models\ClubSetting;
 use App\Models\Permissao;
+use App\Models\Periodicidade;
 use App\Models\QuotaPlan;
+use App\Models\TipoVencimentoQuota;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -27,9 +27,9 @@ class DatabaseSeeder extends Seeder
         QuotaPlan::query()->firstOrCreate(
             ['nome' => 'Quota social — mensal'],
             [
-                'periodicidade' => Periodicidade::Mensal,
+                'periodicidade_id' => Periodicidade::query()->where('slug', 'mensal')->value('id') ?? 1,
                 'valor' => 15,
-                'tipo_vencimento' => TipoVencimentoQuota::Aniversario,
+                'tipo_vencimento_quota_id' => TipoVencimentoQuota::query()->where('slug', 'aniversario')->value('id') ?? 1,
                 'dia_vencimento_mes' => 1,
             ],
         );

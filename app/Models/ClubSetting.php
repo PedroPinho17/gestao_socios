@@ -17,6 +17,7 @@ class ClubSetting extends Model
 
     protected $fillable = [
         'nome_clube',
+        'panel_primary_color',
         'logo_path',
         'card_gradient_from',
         'card_gradient_to',
@@ -27,6 +28,7 @@ class ClubSetting extends Model
         'show_cargo',
         'show_email',
         'show_telefone',
+        'card_layout',
     ];
 
     protected function casts(): array
@@ -36,7 +38,16 @@ class ClubSetting extends Model
             'show_cargo' => 'boolean',
             'show_email' => 'boolean',
             'show_telefone' => 'boolean',
+            'card_layout' => 'array',
         ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function resolvedCardLayout(): array
+    {
+        return \App\Support\MemberCardLayout::resolve($this);
     }
 
     public static function current(): self
@@ -70,6 +81,7 @@ class ClubSetting extends Model
     {
         return [
             'nome_clube' => 'O meu clube',
+            'panel_primary_color' => '#10b981',
             'card_gradient_from' => '#0f766e',
             'card_gradient_to' => '#0f172a',
             'card_accent_color' => '#d1fae5',
@@ -79,6 +91,7 @@ class ClubSetting extends Model
             'show_cargo' => true,
             'show_email' => false,
             'show_telefone' => false,
+            'card_layout' => \App\Support\MemberCardLayout::defaults(),
         ];
     }
 
@@ -95,9 +108,9 @@ class ClubSetting extends Model
     {
         return LogOptions::defaults()
             ->logOnly([
-                'nome_clube', 'logo_path', 'card_gradient_from', 'card_gradient_to',
+                'nome_clube', 'panel_primary_color', 'logo_path', 'card_gradient_from', 'card_gradient_to',
                 'card_accent_color', 'card_titulo', 'card_campo_extra_label',
-                'show_proximo_vencimento', 'show_cargo', 'show_email', 'show_telefone',
+                'show_proximo_vencimento', 'show_cargo', 'show_email', 'show_telefone', 'card_layout',
             ])
             ->logOnlyDirty()
             ->dontLogEmptyChanges();

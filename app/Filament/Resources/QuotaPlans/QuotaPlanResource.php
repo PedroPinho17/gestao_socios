@@ -2,10 +2,10 @@
 
 namespace App\Filament\Resources\QuotaPlans;
 
-use App\Enums\Periodicidade;
-use App\Enums\TipoVencimentoQuota;
 use App\Filament\Resources\QuotaPlans\Pages\ManageQuotaPlans;
+use App\Models\Periodicidade;
 use App\Models\QuotaPlan;
+use App\Models\TipoVencimentoQuota;
 use App\Services\QuotaService;
 use BackedEnum;
 use Filament\Actions\DeleteAction;
@@ -61,26 +61,22 @@ class QuotaPlanResource extends Resource
                     ->label('Nome do plano')
                     ->required()
                     ->maxLength(255),
-                Select::make('periodicidade')
+                Select::make('periodicidade_id')
                     ->label('Periodicidade')
-                    ->options(collect(Periodicidade::cases())->mapWithKeys(
-                        fn (Periodicidade $p) => [$p->value => $p->label()],
-                    ))
+                    ->options(fn (): array => Periodicidade::optionsForSelect())
                     ->required()
-                    ->default(Periodicidade::Mensal->value),
+                    ->default(fn (): int => (int) (Periodicidade::query()->where('slug', 'mensal')->value('id') ?? 1)),
                 TextInput::make('valor')
                     ->label('Valor (€)')
                     ->required()
                     ->numeric()
                     ->minValue(0)
                     ->step(0.01),
-                Select::make('tipo_vencimento')
+                Select::make('tipo_vencimento_quota_id')
                     ->label('Regra do vencimento')
-                    ->options(collect(TipoVencimentoQuota::cases())->mapWithKeys(
-                        fn (TipoVencimentoQuota $t) => [$t->value => $t->label()],
-                    ))
+                    ->options(fn (): array => TipoVencimentoQuota::optionsForSelect())
                     ->required()
-                    ->default(TipoVencimentoQuota::Aniversario->value)
+                    ->default(fn (): int => (int) (TipoVencimentoQuota::query()->where('slug', 'aniversario')->value('id') ?? 1))
                     ->live(),
                 TextInput::make('dia_vencimento_mes')
                     ->label('Dia do mês (1–31)')
@@ -88,24 +84,35 @@ class QuotaPlanResource extends Resource
                     ->minValue(1)
                     ->maxValue(31)
                     ->default(1)
-                    ->visible(fn (Get $get): bool => $get('tipo_vencimento') === TipoVencimentoQuota::DiaFixo->value),
+                    ->visible(function (Get $get): bool {
+                        $tipoId = $get('tipo_vencimento_quota_id');
+
+                        if (! $tipoId) {
+                            return false;
+                        }
+
+                        return TipoVencimentoQuota::query()
+                            ->whereKey($tipoId)
+                            ->where('slug', 'dia_fixo')
+                            ->exists();
+                    }),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['periodicidade', 'tipoVencimento']))
             ->columns([
                 TextColumn::make('nome')
                     ->label('Nome')
                     ->searchable(),
-                TextColumn::make('periodicidade')
-                    ->label('Periodicidade')
-                    ->formatStateUsing(fn (Periodicidade $state): string => $state->label()),
+                TextColumn::make('periodicidade.nome')
+                    ->label('Periodicidade'),
                 TextColumn::make('valor')
                     ->label('Valor')
                     ->formatStateUsing(fn ($state): string => number_format((float) $state, 2, ',', ' ').' €'),
-                TextColumn::make('tipo_vencimento')
+                TextColumn::make('tipoVencimento.nome')
                     ->label('Vencimento')
                     ->formatStateUsing(fn (QuotaPlan $record): string => app(QuotaService::class)->resumoVencimentoPlano($record)),
             ])

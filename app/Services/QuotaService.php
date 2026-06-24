@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\Periodicidade;
 use App\Enums\QuotaSituationKind;
-use App\Enums\TipoVencimentoQuota;
 use App\Models\AppSetting;
 use App\Models\Member;
 use App\Models\Payment;
@@ -86,9 +84,9 @@ class QuotaService
 
     public function computeNextDueDate(QuotaPlan $plan, Carbon $base): Carbon
     {
-        $months = $plan->periodicidade->periodMonths();
+        $months = $plan->periodicidade->meses;
 
-        if ($plan->tipo_vencimento !== TipoVencimentoQuota::DiaFixo) {
+        if (! $plan->tipoVencimento->isSlug('dia_fixo')) {
             return $base->copy()->addMonths($months);
         }
 
@@ -101,7 +99,7 @@ class QuotaService
 
     public function resumoVencimentoPlano(QuotaPlan $plan): string
     {
-        if ($plan->tipo_vencimento === TipoVencimentoQuota::DiaFixo) {
+        if ($plan->tipoVencimento->isSlug('dia_fixo')) {
             return 'Dia '.$plan->dia_vencimento_mes;
         }
 
@@ -157,7 +155,7 @@ class QuotaService
         }
 
         return Member::query()
-            ->with(['quotaPlan', 'payments'])
+            ->with(['quotaPlan.periodicidade', 'quotaPlan.tipoVencimento', 'payments'])
             ->whereIn('id', $ids)
             ->get();
     }
@@ -250,7 +248,7 @@ class QuotaService
     private function membersWithRelations(): Collection
     {
         return Member::query()
-            ->with(['quotaPlan', 'payments'])
+            ->with(['quotaPlan.periodicidade', 'quotaPlan.tipoVencimento', 'payments'])
             ->get();
     }
 

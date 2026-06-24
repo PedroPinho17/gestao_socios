@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Member;
+use App\Services\MemberCardBatchExporter;
+use App\Services\MemberCardRenderer;
 use App\Services\MemberCardViewData;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Support\MemberCardLayout;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response as BaseResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MemberCardController extends Controller
 {
@@ -15,15 +19,34 @@ class MemberCardController extends Controller
         return view('member-card', $viewData->for($member));
     }
 
-    public function pdf(Member $member, MemberCardViewData $viewData): Response
+    public function showVerso(Member $member, MemberCardViewData $viewData): View
     {
         $data = $viewData->for($member);
 
-        $pdf = Pdf::loadView('member-card-pdf', $data)
-            ->setPaper([0, 0, 242.65, 153.07], 'landscape');
+        if (! MemberCardLayout::hasVerso($data['layout'])) {
+            abort(404, 'Este cartão não tem verso configurado (texto ou QR).');
+        }
 
-        $safeName = preg_replace('/[^\w\-]+/u', '_', $member->nome) ?: 'socio';
+        return view('member-card-verso', $data);
+    }
 
-        return $pdf->download("cartao_{$member->numero}_{$safeName}.pdf");
+    public function pdf(Member $member, MemberCardRenderer $renderer): Response
+    {
+        return $renderer->pdfResponse($member);
+    }
+
+    public function png(Member $member, MemberCardRenderer $renderer): BaseResponse
+    {
+        return $renderer->pngResponse($member);
+    }
+
+    public function pngVerso(Member $member, MemberCardRenderer $renderer): BaseResponse
+    {
+        return $renderer->pngVersoResponse($member);
+    }
+
+    public function exportZip(MemberCardBatchExporter $exporter): StreamedResponse
+    {
+        return $exporter->zipActiveMembersResponse();
     }
 }
