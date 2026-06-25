@@ -1,14 +1,20 @@
-# Gestão de Sócios — Laravel + Filament
+# Gestão de Sócios — Laravel + Filament + React
 
-Backoffice com login para gerir sócios, quotas, pagamentos e cartões de sócio.
+Sistema para clubes gerirem sócios, quotas, pagamentos e cartões de sócio.
+
+- **Backoffice** (`/admin`) — painel Filament para administradores e tesoureiros
+- **Área do sócio** (`frontend/`) — SPA React onde cada sócio consulta a quota e o histórico de pagamentos
 
 ## Requisitos
 
 - PHP 8.3+ (extensões: `intl`, `zip`, `pdo`, `mbstring`, `openssl`, `fileinfo`)
 - Composer
+- Node.js 20+ e npm (área do sócio; opcionalmente exportação profissional de cartões)
 - MySQL/MariaDB (produção / cPanel) ou SQLite (desenvolvimento local)
 
 ## Instalação local
+
+### Backend (Laravel)
 
 ```bash
 composer install
@@ -20,6 +26,29 @@ php artisan serve
 ```
 
 Abra **http://localhost:8000/admin**
+
+### Área do sócio (React)
+
+```bash
+cd frontend
+cp .env.example .env   # se ainda não existir
+npm install
+npm run dev
+```
+
+Abra **http://localhost:5173**
+
+No `.env` da raiz, confirme `CORS_ALLOWED_ORIGINS=http://localhost:5173`. No `frontend/.env`, use `VITE_API_URL=http://localhost:8000/api`.
+
+### Arranque rápido (só backend + assets Filament)
+
+Na raiz do projeto:
+
+```bash
+composer run dev
+```
+
+Isto corre o servidor Laravel, fila, logs e Vite dos assets do painel. A área do sócio continua a precisar de `npm run dev` em `frontend/` noutro terminal.
 
 ### Performance local (Windows)
 
@@ -49,25 +78,63 @@ Os perfis ficam na tabela `permissoes` (IDs fixos: 1 Imperador, 2 Administrador,
 
 | `.env` (só infraestrutura) | Base de dados / painel |
 |-----------------------------|-------------------------|
-| `APP_KEY`, `APP_ENV`, `APP_DEBUG`, `APP_URL` | Perfis (`permissoes`) e utilizadores |
+| `APP_KEY`, `APP_ENV`, `APP_DEBUG`, `APP_URL` | Perfis (`permissoes`) e utilizadores do backoffice |
 | Ligação MySQL (`DB_*`) | Clube, cartão, logótipo (`club_settings` → **Definições**) |
-| | 2FA obrigatório, dias de alerta de quota (`app_settings` → **Sistema**, só imperador) |
-| | Planos de quota, sócios, pagamentos |
+| `CORS_ALLOWED_ORIGINS` (URL do frontend React) | Contas de acesso dos sócios (email/password na ficha do sócio) |
+| `CLUB_LOGO` (fallback em `public/`) | 2FA obrigatório, dias de alerta de quota (`app_settings` → **Sistema**, só imperador) |
+| `CLUB_MEMBER_AREA_*` (textos opcionais da área do sócio) | Planos de quota, sócios, pagamentos |
+| `BROWSERSHOT_*` (opcional — export PDF/PNG profissional) | |
 
-No `.env` só precisa de **APP_KEY** + **DB_*** + **APP_URL** (em produção). O resto configura-se no painel após login.
+No `.env` só precisa de **APP_KEY** + **DB_*** + **APP_URL** (em produção) + **CORS** (se usar a área do sócio). O resto configura-se no painel após login.
 
 ## Funcionalidades
 
+### Backoffice (`/admin`)
+
 - **Painel** — resumo de sócios e alertas de quotas em atraso / a vencer
 - **Sócios** — CRUD, pesquisa por nome/n.º/email, filtros por estado de quota, pagamentos na ficha
+- **Conta de acesso** — na ficha do sócio, criar ou atualizar email/password para a área do sócio
 - **Planos de quota** — periodicidade, valor, regra de vencimento
 - **Definições** — nome do clube, logótipo, cores e campos do cartão (título do painel usa o nome do clube)
 - **Sistema** — 2FA obrigatório, dias de aviso de quota (só imperador)
-- **Utilizadores** — criar/editar contas (imperador: todos os perfis; administrador: admin e tesoureiro)
-- **Cartão** — impressão no browser ou PDF no servidor (`/cartao/{id}`, requer login)
-- **Relatórios** — sócios em atraso em PDF ou Excel/CSV (botões na lista de sócios)
+- **Utilizadores** — criar/editar contas do backoffice (imperador: todos os perfis; administrador: admin e tesoureiro)
+- **Cartão** — impressão no browser ou PDF/PNG no servidor (`/cartao/{id}`, requer login)
+- **Validação QR** — URL assinada no cartão (`/validar/{id}`) mostra situação da quota sem login
+- **Relatórios** — sócios em atraso em PDF ou Excel/CSV; export em lote de cartões ZIP
+
+### Área do sócio (`frontend/`)
+
+- Login com email e password (token Sanctum)
+- Alteração obrigatória de password no 1.º acesso
+- Consulta da situação da quota (em dia, a vencer, em atraso)
+- Histórico de pagamentos
+- Branding do clube (nome, cores, logótipo) via API pública `/api/branding`
+
+### API (`/api`)
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| GET | `/api/branding` | Nome, cores e logótipo do clube (público) |
+| POST | `/api/login` | Login do sócio → token Bearer |
+| POST | `/api/logout` | Terminar sessão (autenticado) |
+| GET | `/api/me` | Perfil do sócio autenticado |
+| PUT | `/api/me/password` | Alterar password |
+| GET | `/api/me/quota` | Situação da quota |
+| GET | `/api/me/payments` | Histórico de pagamentos |
+
+## Exportação de cartões (opcional)
+
+Por defeito, PDF usa DomPDF e PNG usa GD. Para qualidade profissional (Chrome headless), instale Node.js + Google Chrome e configure no `.env`:
+
+```env
+BROWSERSHOT_CHROME_PATH="C:\Program Files\Google\Chrome\Application\chrome.exe"
+BROWSERSHOT_NODE_BINARY="C:\Program Files\nodejs\node.exe"
+BROWSERSHOT_NPM_BINARY="C:\Program Files\nodejs\npm.cmd"
+```
 
 ## Deploy no cPanel
+
+### Backend
 
 1. Crie uma base de dados **MySQL** e anote host, nome, utilizador e password.
 2. Envie os ficheiros do projeto para o servidor.
@@ -85,6 +152,8 @@ DB_PORT=3306
 DB_DATABASE=nome_da_bd
 DB_USERNAME=utilizador
 DB_PASSWORD=password
+
+CORS_ALLOWED_ORIGINS=https://socios.seuclube.pt
 ```
 
 5. No terminal SSH do cPanel (ou tarefa única):
@@ -104,6 +173,20 @@ php artisan view:cache
 6. Permissões de escrita em `storage/` e `bootstrap/cache/`.
 7. Active HTTPS (Let's Encrypt no cPanel).
 
+### Área do sócio (frontend)
+
+Num subdomínio separado (ex. `socios.seuclube.pt`):
+
+```bash
+cd frontend
+cp .env.example .env
+# VITE_API_URL=https://app.seuclube.pt/api
+npm ci
+npm run build
+```
+
+Publique o conteúdo de `frontend/dist/` no document root desse subdomínio. Confirme que `CORS_ALLOWED_ORIGINS` no backend inclui o URL exacto do frontend.
+
 ### phpMyAdmin
 
 A base de dados MySQL pode ser gerida no **phpMyAdmin** do cPanel (backups, consultas). Em produção, use as **migrations** do Laravel para alterar a estrutura.
@@ -112,14 +195,15 @@ A base de dados MySQL pode ser gerida no **phpMyAdmin** do cPanel (backups, cons
 
 | Funcionalidade | Descrição |
 |----------------|-----------|
-| **Password obrigatória no 1.º login** | Contas novas podem exigir alteração de password; mínimo 12 caracteres |
-| **Perfis na BD** | Tabela `permissoes` com 3 níveis; utilizadores ligados por `permissao_id` |
-| **Perfis** | Ver tabela abaixo |
+| **Password obrigatória no 1.º login** | Contas novas (backoffice e sócios) podem exigir alteração de password; mínimo 12 caracteres |
+| **Perfis na BD** | Tabela `permissoes` com 3 níveis; utilizadores do backoffice ligados por `permissao_id` |
+| **Contas de sócio** | Utilizadores com perfil «sócio» (`isMember()`); acesso só à API da área do sócio |
 | **2FA** | Perfil → autenticação por app. Obrigatoriedade em **Configuração → Sistema** (só imperador) |
 | **Ficheiros privados** | Fotos e logótipos servidos só com login (`/files/...`) |
+| **Validação QR** | Links assinados com expiração; não expõem dados sensíveis |
 | **Auditoria** | Menu «Auditoria» (só imperador) regista alterações a sócios, pagamentos, planos e definições |
 
-### Perfis de utilizador
+### Perfis de utilizador (backoffice)
 
 | Perfil | Acesso |
 |--------|--------|
@@ -151,9 +235,25 @@ Menu **Configuração → Utilizadores** (`/admin/users`):
 
 O novo utilizador terá de alterar a password no primeiro login.
 
+### Dar acesso à área do sócio
+
+Na ficha do sócio (**Sócios → editar**), use **Criar conta de acesso** (ou **Atualizar conta de acesso**). O sócio entra em `https://socios.seuclube.pt` (ou `http://localhost:5173` em desenvolvimento) com esse email e password.
+
 ## Estrutura
 
-- `app/Models` — Sócios, planos, pagamentos, definições
-- `app/Services/QuotaService.php` — cálculo de vencimentos
-- `app/Filament` — painel administrativo
-- `resources/views/member-card.blade.php` — cartão para impressão
+```
+app/
+  Filament/          — painel administrativo
+  Http/Controllers/
+    Api/             — autenticação e dados da área do sócio
+  Models/            — sócios, planos, pagamentos, definições
+  Services/          — quotas, cartões, contas de sócio
+frontend/            — SPA React (área do sócio)
+  src/api/           — cliente HTTP (Sanctum Bearer)
+  src/pages/         — login, dashboard, pagamentos
+resources/views/
+  cards/             — templates do cartão de sócio
+routes/
+  api.php            — API da área do sócio
+  web.php            — cartões, validação QR, ficheiros seguros
+```
