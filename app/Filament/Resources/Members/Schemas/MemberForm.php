@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Members\Schemas;
 
 use App\Models\Member;
+use App\Services\MemberAccountService;
 use App\Services\QuotaService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -89,6 +90,31 @@ class MemberForm
                                 return app(QuotaService::class)->formatSituationLabel(
                                     app(QuotaService::class)->getSituation($record),
                                 );
+                            }),
+                    ]),
+                Section::make('Área do sócio')
+                    ->description('Acesso ao frontend (login do sócio).')
+                    ->visible(fn (?Member $record) => filled($record))
+                    ->schema([
+                        Placeholder::make('conta_acesso')
+                            ->label('Conta de login')
+                            ->content(function (?Member $record): string {
+                                if (! $record) {
+                                    return '—';
+                                }
+
+                                $record->loadMissing('user');
+                                $account = app(MemberAccountService::class)->accountFor($record);
+
+                                if (! $account) {
+                                    return 'Sem conta — use «Criar conta de acesso» no topo da página.';
+                                }
+
+                                $status = $account->must_change_password
+                                    ? ' (deve alterar a password no primeiro acesso)'
+                                    : '';
+
+                                return "Email: {$account->email}{$status}";
                             }),
                     ]),
             ]);

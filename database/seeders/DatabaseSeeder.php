@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
 
         if (app()->environment('local')) {
             $this->seedDemoUsers();
+            $this->call(MemberDemoSeeder::class);
         }
 
         ClubSetting::current();

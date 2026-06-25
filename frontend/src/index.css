@@ -1,0 +1,555 @@
+:root {
+  /* Cores de marca (usadas em FUNDOS/gradientes, nunca como texto direto) */
+  --club-primary: #0f766e;
+  --club-gradient-from: #0f766e;
+  --club-gradient-to: #0f172a;
+  --club-accent: #d1fae5;
+
+  /* Cor de texto sobre o gradiente do cabeçalho (sempre clara) */
+  --club-on-brand: #ffffff;
+
+  /* Tinta de texto (sempre escura e legível, independente da marca) */
+  --ink-900: #0f172a;
+  --ink-700: #334155;
+  --ink-500: #64748b;
+  --ink-200: #e2e8f0;
+  --surface: #f1f5f9;
+
+  color: var(--ink-900);
+  background: var(--surface);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2 {
+  letter-spacing: -0.01em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+.page-center {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+/* —— Login —— */
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--club-gradient-from) 14%, transparent), color-mix(in srgb, var(--club-gradient-to) 10%, transparent)),
+    #f1f5f9;
+}
+
+.login-page__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--club-primary) 18%, transparent), transparent 45%);
+  pointer-events: none;
+}
+
+.login-card {
+  position: relative;
+  width: min(100%, 26rem);
+  padding: 0;
+  overflow: hidden;
+  border-top: 4px solid var(--club-primary);
+}
+
+.login-card--loading {
+  padding: 2rem;
+  text-align: center;
+}
+
+.login-card__body {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+
+.change-password-title {
+  font-size: 1.25rem;
+}
+
+.field-hint {
+  margin: -0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-500);
+}
+
+.change-password-logout {
+  width: 100%;
+}
+
+.club-brand-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 2rem 1.5rem 1.5rem;
+  text-align: center;
+  color: var(--club-on-brand);
+  /* Mistura o fim do gradiente com escuro para garantir contraste mesmo
+     quando o clube configura um gradient_to claro (ex.: cinza). */
+  background: linear-gradient(
+    135deg,
+    var(--club-gradient-from),
+    color-mix(in srgb, var(--club-gradient-to) 65%, #0f172a)
+  );
+}
+
+.club-brand-header--compact {
+  flex-direction: row;
+  text-align: left;
+  padding: 1rem 1.25rem;
+  gap: 0.875rem;
+}
+
+.club-brand-header__text h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.club-brand-header__text p {
+  margin-top: 0.2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--club-on-brand) 82%, transparent);
+}
+
+.club-logo {
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.2));
+}
+
+.club-logo-sm {
+  width: 2.5rem;
+  height: 2.5rem;
+  max-width: 2.5rem;
+}
+
+.club-logo-md {
+  width: 3.5rem;
+  height: 3.5rem;
+  max-width: 4.5rem;
+}
+
+.club-logo-lg {
+  width: auto;
+  height: 4.5rem;
+  max-width: 100%;
+}
+
+.club-logo-fallback {
+  display: inline-grid;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: var(--club-primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* Sobre o gradiente do cabeçalho, usa um look translúcido */
+.club-brand-header .club-logo-fallback {
+  background: color-mix(in srgb, var(--club-on-brand) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--club-on-brand) 32%, transparent);
+}
+
+.club-logo-fallback.club-logo-sm {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 0.85rem;
+}
+
+.club-logo-fallback.club-logo-md {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1rem;
+}
+
+.club-logo-fallback.club-logo-lg {
+  width: 4.5rem;
+  height: 4.5rem;
+  font-size: 1.25rem;
+}
+
+/* —— App shell —— */
+.app-shell {
+  min-height: 100vh;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1rem 2rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--club-gradient-from) 8%, transparent) 0%, transparent 12rem),
+    #f1f5f9;
+}
+
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.app-header-card {
+  border-top: 3px solid var(--club-primary);
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  min-width: 0;
+}
+
+.app-header h1 {
+  font-size: 1.35rem;
+  margin-top: 0.15rem;
+  line-height: 1.2;
+}
+
+.app-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.app-nav a {
+  padding: 0.5rem 0.875rem;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--ink-200);
+  color: var(--ink-700);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.app-nav a:hover {
+  border-color: color-mix(in srgb, var(--club-primary) 40%, var(--ink-200));
+  color: var(--club-primary);
+}
+
+.app-nav a.active {
+  background: var(--club-primary);
+  border-color: var(--club-primary);
+  color: #fff;
+}
+
+.app-main {
+  display: grid;
+  gap: 1rem;
+}
+
+.app-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--ink-200);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.card > h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-500);
+}
+
+.muted {
+  color: var(--ink-500);
+}
+
+.field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.field span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+
+.field input,
+.password-field input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  background: #fff;
+  color: var(--ink-900);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field input::placeholder,
+.password-field input::placeholder {
+  color: #94a3b8;
+}
+
+.field input:focus,
+.password-field input:focus {
+  outline: none;
+  border-color: var(--club-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--club-primary) 22%, transparent);
+}
+
+/* Campo de password com botão "olhinho" */
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: 2.75rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--ink-500);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.password-toggle:hover {
+  color: var(--club-primary);
+  background: color-mix(in srgb, var(--club-primary) 10%, transparent);
+}
+
+.btn {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--club-primary);
+  color: #fff;
+}
+
+.btn-secondary {
+  display: inline-block;
+  margin-top: 1rem;
+  background: color-mix(in srgb, var(--club-primary) 12%, #fff);
+  color: color-mix(in srgb, var(--club-primary) 75%, #0f172a);
+  border: 1px solid color-mix(in srgb, var(--club-primary) 25%, #e2e8f0);
+}
+
+.btn-secondary:hover {
+  background: color-mix(in srgb, var(--club-primary) 18%, #fff);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--club-primary);
+  border: 1px solid #cbd5e1;
+}
+
+.alert {
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.875rem;
+  font-size: 0.95rem;
+}
+
+.alert-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.badge-ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-due-soon {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.badge-overdue {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.badge-neutral {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.quota-header {
+  margin: 1rem 0;
+}
+
+.highlight-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.875rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.highlight-box--accent {
+  border-color: color-mix(in srgb, var(--club-primary) 25%, #e2e8f0);
+  background: color-mix(in srgb, var(--club-primary) 6%, #fff);
+}
+
+.due-date {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+  color: var(--ink-900);
+  letter-spacing: -0.01em;
+}
+
+.meta-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+}
+
+.meta-list div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.meta-list dt {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-500);
+}
+
+.meta-list dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px solid var(--ink-200);
+}
+
+.data-table th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-500);
+}
+
+.empty-state {
+  margin-top: 1rem;
+  color: var(--ink-500);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .app-shell {
+    padding: 1.5rem 1.5rem 2.5rem;
+  }
+}

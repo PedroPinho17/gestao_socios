@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Members\Pages;
 
+use App\Filament\Resources\Members\Actions\CreateMemberAccountAction;
 use App\Filament\Resources\Members\MemberResource;
 use App\Models\ClubSetting;
 use App\Support\MemberCardLayout;
@@ -16,6 +17,7 @@ class EditMember extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            CreateMemberAccountAction::make(),
             Action::make('cartao')
                 ->label('Ver cartão')
                 ->icon('heroicon-o-identification')

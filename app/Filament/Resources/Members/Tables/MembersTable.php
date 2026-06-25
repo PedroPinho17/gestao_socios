@@ -2,9 +2,11 @@
 
 namespace App\Filament\Resources\Members\Tables;
 
+use App\Filament\Resources\Members\Actions\CreateMemberAccountAction;
 use App\Models\Member;
 use App\Services\QuotaService;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -19,7 +21,7 @@ class MembersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with(['quotaPlan.periodicidade', 'quotaPlan.tipoVencimento', 'payments']))
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['quotaPlan.periodicidade', 'quotaPlan.tipoVencimento', 'payments', 'user']))
             ->columns([
                 TextColumn::make('numero')
                     ->label('N.º')
@@ -52,6 +54,17 @@ class MembersTable
                 IconColumn::make('ativo')
                     ->label('Ativo')
                     ->boolean(),
+                IconColumn::make('user')
+                    ->label('Área sócio')
+                    ->boolean()
+                    ->getStateUsing(fn (Member $record): bool => $record->user !== null)
+                    ->trueIcon('heroicon-o-key')
+                    ->falseIcon('heroicon-o-minus')
+                    ->trueColor('success')
+                    ->falseColor('gray')
+                    ->tooltip(fn (Member $record): string => $record->user
+                        ? "Conta: {$record->user->email}"
+                        : 'Sem conta de acesso'),
             ])
             ->filters([
                 SelectFilter::make('quota_status')
@@ -84,22 +97,25 @@ class MembersTable
                     ]),
             ])
             ->recordActions([
-                Action::make('cartao')
-                    ->label('Cartão')
-                    ->icon('heroicon-o-identification')
-                    ->url(fn (Member $record): string => route('member.card', $record))
-                    ->openUrlInNewTab(),
-                Action::make('cartao_pdf')
-                    ->label('PDF')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->url(fn (Member $record): string => route('member.card.pdf', $record))
-                    ->openUrlInNewTab(),
-                Action::make('cartao_png')
-                    ->label('PNG')
-                    ->icon('heroicon-o-photo')
-                    ->url(fn (Member $record): string => route('member.card.png', $record))
-                    ->openUrlInNewTab(),
-                EditAction::make(),
+                ActionGroup::make([
+                    EditAction::make(),
+                    CreateMemberAccountAction::make(),
+                    Action::make('cartao')
+                        ->label('Ver cartão')
+                        ->icon('heroicon-o-identification')
+                        ->url(fn (Member $record): string => route('member.card', $record))
+                        ->openUrlInNewTab(),
+                    Action::make('cartao_pdf')
+                        ->label('Cartão PDF')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->url(fn (Member $record): string => route('member.card.pdf', $record))
+                        ->openUrlInNewTab(),
+                    Action::make('cartao_png')
+                        ->label('Cartão PNG')
+                        ->icon('heroicon-o-photo')
+                        ->url(fn (Member $record): string => route('member.card.png', $record))
+                        ->openUrlInNewTab(),
+                ]),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

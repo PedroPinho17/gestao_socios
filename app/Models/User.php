@@ -13,15 +13,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
 use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
 
-#[Fillable(['name', 'email', 'password', 'permissao_id', 'must_change_password', 'password_changed_at'])]
+// Sócio = User com member_id preenchido e permissao_id null (sem papel de staff no Filament).
+#[Fillable(['name', 'email', 'password', 'permissao_id', 'member_id', 'must_change_password', 'password_changed_at'])]
 #[Hidden(['password', 'remember_token', 'app_authentication_secret', 'app_authentication_recovery_codes'])]
 class User extends Authenticatable implements FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
     use InteractsWithAppAuthentication;
     use InteractsWithAppAuthenticationRecovery;
 
@@ -40,8 +42,27 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return $this->belongsTo(Permissao::class);
     }
 
+    public function member(): BelongsTo
+    {
+        return $this->belongsTo(Member::class);
+    }
+
+    public function isMember(): bool
+    {
+        return filled($this->member_id);
+    }
+
+    public function isStaff(): bool
+    {
+        return ! $this->isMember();
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
+        if ($this->isMember()) {
+            return false;
+        }
+
         return in_array($this->permissao_id, [
             Permissao::IMPERADOR,
             Permissao::ADMINISTRADOR,

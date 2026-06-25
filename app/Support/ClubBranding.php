@@ -26,11 +26,25 @@ final class ClubBranding
 
     public static function logoUrl(): ?string
     {
-        if (! self::hasLogo()) {
-            return self::uploadedLogoUrl();
+        return self::publicLogoUrl();
+    }
+
+    /**
+     * URL acessível sem autenticação (login, validação QR, área do sócio).
+     */
+    public static function publicLogoUrl(): ?string
+    {
+        if (self::hasLogo()) {
+            return asset(self::logoRelativePath());
         }
 
-        return asset(self::logoRelativePath());
+        $path = self::settings()->logo_path;
+
+        if (blank($path) || ! Storage::disk('local')->exists($path)) {
+            return null;
+        }
+
+        return route('club.branding.logo');
     }
 
     public static function logoDataUri(): ?string
@@ -81,6 +95,35 @@ final class ClubBranding
         return self::settings()->card_accent_color ?? '#d1fae5';
     }
 
+    /**
+     * @return array{
+     *     club_name: string,
+     *     logo_url: ?string,
+     *     primary_color: string,
+     *     gradient_from: string,
+     *     gradient_to: string,
+     *     accent_color: string,
+     *     member_area_title: string,
+     *     member_area_login_subtitle: string,
+     * }
+     */
+    public static function forMemberArea(): array
+    {
+        return [
+            'club_name' => self::clubName(),
+            'logo_url' => self::publicLogoUrl(),
+            'primary_color' => self::primaryColor(),
+            'gradient_from' => self::gradientFrom(),
+            'gradient_to' => self::gradientTo(),
+            'accent_color' => self::accentColor(),
+            'member_area_title' => (string) config('club.member_area.title', 'Área do sócio'),
+            'member_area_login_subtitle' => (string) config(
+                'club.member_area.login_subtitle',
+                'Inicie sessão com o email e password do clube.',
+            ),
+        ];
+    }
+
     public static function brandLockupHtml(): ?Htmlable
     {
         $url = self::logoUrl();
@@ -99,17 +142,6 @@ final class ClubBranding
             '</span>'.
             '</span>'
         );
-    }
-
-    private static function uploadedLogoUrl(): ?string
-    {
-        $path = self::settings()->logo_path;
-
-        if (blank($path) || ! Storage::disk('local')->exists($path)) {
-            return null;
-        }
-
-        return route('secure.club.logo');
     }
 
     private static function uploadedLogoDataUri(): ?string

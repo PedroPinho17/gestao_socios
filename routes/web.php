@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ClubBrandingLogoController;
 use App\Http\Controllers\MemberValidationController;
 use App\Http\Controllers\MemberCardController;
 use App\Http\Controllers\OverdueMembersReportController;
@@ -7,6 +8,8 @@ use App\Http\Controllers\SecureFileController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/admin');
+
+Route::get('/branding/logo', ClubBrandingLogoController::class)->name('club.branding.logo');
 
 Route::get('/validar/{member}', [MemberValidationController::class, 'show'])
     ->name('member.validate')
