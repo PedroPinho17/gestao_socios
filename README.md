@@ -157,3 +157,7 @@ O novo utilizador terá de alterar a password no primeiro login.
 - `app/Services/QuotaService.php` — cálculo de vencimentos
 - `app/Filament` — painel administrativo
 - `resources/views/member-card.blade.php` — cartão para impressão
+
+## Frontend
+cd C:\Projetos_WEB\gestao_socios\frontend>
+npm run dev
