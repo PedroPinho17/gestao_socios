@@ -7,6 +7,8 @@
 
         <title>{{ $title ?? config('app.name') }}</title>
 
+        @include('partials.favicon')
+
         @livewireStyles
     </head>
     <body>

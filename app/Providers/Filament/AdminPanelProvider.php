@@ -27,6 +27,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -52,6 +53,10 @@ class AdminPanelProvider extends PanelProvider
             ->brandName(fn (): string => once(fn (): string => ClubSetting::current()->nome_clube))
             ->brandLogo(fn (): Htmlable|string|null => once(fn (): Htmlable|string|null => ClubBranding::brandLockupHtml() ?? ClubBranding::logoUrl()))
             ->brandLogoHeight('auto')
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn (): string => view('partials.favicon')->render(),
+            )
             ->spa()
             ->spaUrlExceptions([
                 '/cartao/*',
