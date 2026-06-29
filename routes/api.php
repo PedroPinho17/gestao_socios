@@ -19,5 +19,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('member.password.changed')->group(function () {
         Route::get('/me/quota', [MemberQuotaController::class, 'show']);
         Route::get('/me/payments', [MemberPaymentController::class, 'index']);
+        Route::get('/me/payments/{payment}/receipt', [MemberPaymentController::class, 'receipt']);
     });
 });

@@ -38,3 +38,19 @@ export async function getPayments(page = 1): Promise<PaginatedPayments> {
   });
   return data;
 }
+
+export async function downloadPaymentReceipt(paymentId: number): Promise<void> {
+  const response = await api.get(`/me/payments/${paymentId}/receipt`, {
+    responseType: 'blob',
+  });
+
+  const blob = new Blob([response.data], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `comprovativo_${paymentId}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}

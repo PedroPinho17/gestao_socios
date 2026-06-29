@@ -82,6 +82,7 @@ Os perfis ficam na tabela `permissoes` (IDs fixos: 1 Imperador, 2 Administrador,
 | Ligação MySQL (`DB_*`) | Clube, cartão, logótipo (`club_settings` → **Definições**) |
 | `CORS_ALLOWED_ORIGINS` (URL do frontend React) | Contas de acesso dos sócios (email/password na ficha do sócio) |
 | `CLUB_LOGO` (fallback em `public/`) | 2FA obrigatório, dias de alerta de quota (`app_settings` → **Sistema**, só imperador) |
+| `MAIL_*` (SMTP para envio de comprovativos) | |
 | `CLUB_MEMBER_AREA_*` (textos opcionais da área do sócio) | Planos de quota, sócios, pagamentos |
 | `BROWSERSHOT_*` (opcional — export PDF/PNG profissional) | |
 
@@ -95,19 +96,20 @@ No `.env` só precisa de **APP_KEY** + **DB_*** + **APP_URL** (em produção) + 
 - **Sócios** — CRUD, pesquisa por nome/n.º/email, filtros por estado de quota, pagamentos na ficha
 - **Conta de acesso** — na ficha do sócio, criar ou atualizar email/password para a área do sócio
 - **Planos de quota** — periodicidade, valor, regra de vencimento
+- **Pagamentos** — registo na ficha do sócio; ao registar, o comprovativo (PDF) é enviado automaticamente por email ao sócio. Cada pagamento tem ações **Comprovativo** (download) e **Enviar por email** (reenvio)
 - **Definições** — nome do clube, logótipo, cores e campos do cartão (título do painel usa o nome do clube)
 - **Sistema** — 2FA obrigatório, dias de aviso de quota (só imperador)
 - **Utilizadores** — criar/editar contas do backoffice (imperador: todos os perfis; administrador: admin e tesoureiro)
 - **Cartão** — impressão no browser ou PDF/PNG no servidor (`/cartao/{id}`, requer login)
 - **Validação QR** — URL assinada no cartão (`/validar/{id}`) mostra situação da quota sem login
-- **Relatórios** — sócios em atraso em PDF ou Excel/CSV; export em lote de cartões ZIP
+- **Relatórios** — sócios em atraso e sócios pagantes (quota em dia) em PDF ou Excel/CSV; export em lote de cartões ZIP (agrupados no botão **Relatórios**)
 
 ### Área do sócio (`frontend/`)
 
 - Login com email e password (token Sanctum)
 - Alteração obrigatória de password no 1.º acesso
 - Consulta da situação da quota (em dia, a vencer, em atraso)
-- Histórico de pagamentos
+- Histórico de pagamentos com download do comprovativo (PDF) de cada pagamento
 - Branding do clube (nome, cores, logótipo) via API pública `/api/branding`
 
 ### API (`/api`)
@@ -121,6 +123,7 @@ No `.env` só precisa de **APP_KEY** + **DB_*** + **APP_URL** (em produção) + 
 | PUT | `/api/me/password` | Alterar password |
 | GET | `/api/me/quota` | Situação da quota |
 | GET | `/api/me/payments` | Histórico de pagamentos |
+| GET | `/api/me/payments/{payment}/receipt` | Comprovativo (PDF) de um pagamento do próprio sócio |
 
 ## Exportação de cartões (opcional)
 
@@ -131,6 +134,29 @@ BROWSERSHOT_CHROME_PATH="C:\Program Files\Google\Chrome\Application\chrome.exe"
 BROWSERSHOT_NODE_BINARY="C:\Program Files\nodejs\node.exe"
 BROWSERSHOT_NPM_BINARY="C:\Program Files\nodejs\npm.cmd"
 ```
+
+## Email (comprovativos de pagamento)
+
+Ao registar um pagamento na ficha do sócio, o sistema gera o comprovativo em PDF e envia-o por email para o sócio (se tiver email na ficha). Pode reenviar a qualquer momento com a ação **Enviar por email** em cada pagamento.
+
+- **Desenvolvimento:** com `MAIL_MAILER=log`, os emails (incluindo o PDF anexado) são escritos em `storage/logs/laravel.log` — útil para testar sem enviar emails reais.
+- **Produção:** configure o SMTP do clube no `.env`:
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.seuclube.pt
+MAIL_PORT=587
+MAIL_USERNAME=geral@seuclube.pt
+MAIL_PASSWORD=********
+MAIL_SCHEME=tls
+MAIL_FROM_ADDRESS="geral@seuclube.pt"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+Notas:
+- Se o sócio não tiver email na ficha, o pagamento é registado na mesma e aparece um aviso (não bloqueia o registo).
+- Se o envio falhar (SMTP mal configurado, etc.), o pagamento fica registado, o erro vai para o log e pode reenviar mais tarde.
+- O envio é síncrono. Para não atrasar o registo com servidores SMTP lentos, pode trocar para fila (`QUEUE_CONNECTION=database` + worker) e usar `Mail::to(...)->queue(...)` — o `Mailable` já usa o trait `Queueable`.
 
 ## Deploy no cPanel
 
