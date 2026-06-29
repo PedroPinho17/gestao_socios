@@ -99,7 +99,7 @@ No `.env` só precisa de **APP_KEY** + **DB_*** + **APP_URL** (em produção) + 
 - **Pagamentos** — registo na ficha do sócio; ao registar, o comprovativo (PDF) é enviado automaticamente por email ao sócio. Cada pagamento tem ações **Comprovativo** (download) e **Enviar por email** (reenvio)
 - **Comunicações** — enviar email a sócios (todos, por estado de quota, ou selecionados) com assunto e mensagem; alternativa por WhatsApp gerando links `wa.me` com a mensagem preenchida (admin/imperador)
 - **Definições** — nome do clube, logótipo, cores e campos do cartão (título do painel usa o nome do clube)
-- **Sistema** — 2FA obrigatório, dias de aviso de quota (só imperador)
+- **Sistema** — 2FA obrigatório, dias de aviso de quota, lembretes automáticos de quota por email (só imperador)
 - **Utilizadores** — criar/editar contas do backoffice (imperador: todos os perfis; administrador: admin e tesoureiro)
 - **Cartão** — impressão no browser ou PDF/PNG no servidor (`/cartao/{id}`, requer login)
 - **Validação QR** — URL assinada no cartão (`/validar/{id}`) mostra situação da quota sem login
@@ -136,28 +136,94 @@ BROWSERSHOT_NODE_BINARY="C:\Program Files\nodejs\node.exe"
 BROWSERSHOT_NPM_BINARY="C:\Program Files\nodejs\npm.cmd"
 ```
 
-## Email (comprovativos de pagamento)
+## Email (SMTP)
 
-Ao registar um pagamento na ficha do sócio, o sistema gera o comprovativo em PDF e envia-o por email para o sócio (se tiver email na ficha). Pode reenviar a qualquer momento com a ação **Enviar por email** em cada pagamento.
+O email é usado em vários sítios: **comprovativos de pagamento**, **comunicações aos sócios** e **lembretes automáticos de quota**.
 
-- **Desenvolvimento:** com `MAIL_MAILER=log`, os emails (incluindo o PDF anexado) são escritos em `storage/logs/laravel.log` — útil para testar sem enviar emails reais.
-- **Produção:** configure o SMTP do clube no `.env`:
+- **Desenvolvimento:** com `MAIL_MAILER=log`, os emails (incluindo PDFs anexados) são escritos em `storage/logs/laravel.log` — útil para testar sem enviar a sério.
+- **Produção:** configure um servidor SMTP no `.env`.
+
+> Depois de alterar o `.env`, reinicie o servidor (`php artisan serve`) ou corra `php artisan config:clear` se a config estiver em cache.
+
+### Opção A — SMTP do alojamento do clube (cPanel)
 
 ```env
 MAIL_MAILER=smtp
-MAIL_HOST=smtp.seuclube.pt
-MAIL_PORT=587
+MAIL_HOST=mail.seuclube.pt
+MAIL_PORT=465
+MAIL_SCHEME=smtps
 MAIL_USERNAME=geral@seuclube.pt
 MAIL_PASSWORD=********
-MAIL_SCHEME=tls
 MAIL_FROM_ADDRESS="geral@seuclube.pt"
 MAIL_FROM_NAME="${APP_NAME}"
 ```
+
+### Opção B — Gmail / Google Workspace
+
+O Gmail **não aceita a password normal**: é preciso uma **App Password** (requer verificação em 2 passos ativa na conta Google → https://myaccount.google.com/apppasswords).
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_SCHEME=smtps
+MAIL_USERNAME=oseuemail@gmail.com
+MAIL_PASSWORD=apppasswordsemespacos
+MAIL_FROM_ADDRESS="oseuemail@gmail.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+- `MAIL_USERNAME` é o **email** (não o nome) e não pode ter espaços.
+- A App Password tem 16 caracteres; introduza-a **sem espaços** (o Google mostra-a com espaços só para leitura).
+- `MAIL_FROM_ADDRESS` deve ser o mesmo email do Gmail (o Google reescreve o remetente para a conta autenticada).
+
+### Comprovativos de pagamento
+
+Ao registar um pagamento na ficha do sócio, o sistema gera o comprovativo em PDF e envia-o por email ao sócio (se tiver email). Pode reenviar a qualquer momento com a ação **Enviar por email** em cada pagamento.
 
 Notas:
 - Se o sócio não tiver email na ficha, o pagamento é registado na mesma e aparece um aviso (não bloqueia o registo).
 - Se o envio falhar (SMTP mal configurado, etc.), o pagamento fica registado, o erro vai para o log e pode reenviar mais tarde.
 - O envio é síncrono. Para não atrasar o registo com servidores SMTP lentos, pode trocar para fila (`QUEUE_CONNECTION=database` + worker) e usar `Mail::to(...)->queue(...)` — o `Mailable` já usa o trait `Queueable`.
+
+## Comunicações aos sócios
+
+Página **Configuração → Comunicações** (admin/imperador) para enviar mensagens em massa:
+
+- **Destinatários:** todos os sócios ativos, por estado de quota (em dia / a vencer / em atraso), ou sócios específicos.
+- **Email:** assunto + mensagem (editor de texto); cada email começa por «Olá {nome},» e leva o branding do clube. Mostra contagem de enviados/falhas e regista na Auditoria.
+- **WhatsApp (grátis):** gera uma lista de links `wa.me` com a mensagem já preenchida — o operador clica em cada sócio e confirma o envio no WhatsApp. Os números são normalizados para formato internacional (assume **+351** quando têm 9 dígitos).
+
+> O WhatsApp por `wa.me` é semi-manual (um a um). Para envio automático em massa de WhatsApp/SMS é necessário um fornecedor pago (Twilio/Meta).
+
+## Lembretes automáticos de quota (email)
+
+O sistema pode avisar os sócios por email quando a quota está prestes a vencer e ainda não foi paga.
+
+- Ative em **Configuração → Sistema → «Lembretes automáticos de quota por email»**.
+- Usa o valor de **«Dias de aviso antes do vencimento»** (mesma página): se faltarem ≤ N dias para o vencimento e o sócio não tiver pago, recebe o lembrete.
+- É enviado **uma vez por vencimento** (não repete todos os dias). Quando o sócio paga, o ciclo seguinte volta a poder avisar.
+- Só envia a sócios **ativos, com plano e com email**.
+
+O comando que faz o envio:
+
+```bash
+php artisan gestao:send-quota-reminders          # envio real (respeita o interruptor)
+php artisan gestao:send-quota-reminders --dry-run # mostra quem seria avisado, sem enviar
+```
+
+Está agendado para correr **todos os dias às 09:00** (`routes/console.php`). Para o agendador funcionar, é preciso o cron do Laravel ativo:
+
+- **Local/servidor próprio:** `php artisan schedule:work` (processo a correr) — ou um cron de minuto.
+- **cPanel:** crie um Cron Job (a cada minuto):
+
+```
+* * * * * /usr/local/bin/php /home/UTILIZADOR/app/artisan schedule:run >> /dev/null 2>&1
+```
+
+(ajuste o caminho do PHP e do projeto). O `schedule:run` corre a cada minuto e o Laravel decide quando executar a tarefa diária.
+
+> Nota: o WhatsApp **não** é enviado automaticamente — o envio gratuito por `wa.me` exige confirmação manual. Para WhatsApp/SMS automáticos é necessário um fornecedor pago (Twilio/Meta).
 
 ## Deploy no cPanel
 

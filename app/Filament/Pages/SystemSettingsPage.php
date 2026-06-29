@@ -47,6 +47,7 @@ class SystemSettingsPage extends Page
         $this->form->fill([
             'mfa_obrigatorio' => AppSetting::bool(AppSetting::MFA_OBRIGATORIO),
             'dias_alerta_quota' => AppSetting::int(AppSetting::DIAS_ALERTA_QUOTA, 7),
+            'lembretes_automaticos' => AppSetting::bool(AppSetting::LEMBRETES_AUTOMATICOS),
         ]);
     }
 
@@ -71,6 +72,9 @@ class SystemSettingsPage extends Page
                             ->required()
                             ->suffix('dias')
                             ->helperText('Sócios dentro deste prazo aparecem como «vence em breve» no painel e filtros.'),
+                        Toggle::make('lembretes_automaticos')
+                            ->label('Lembretes automáticos de quota por email')
+                            ->helperText('Quando activo, envia automaticamente um email ao sócio quando a quota está dentro do prazo de aviso acima e ainda não foi paga (uma vez por vencimento). Requer o agendador (cron) configurado.'),
                     ]),
             ])
             ->statePath('data');
@@ -100,6 +104,7 @@ class SystemSettingsPage extends Page
         AppSetting::setMany([
             AppSetting::MFA_OBRIGATORIO => (bool) ($data['mfa_obrigatorio'] ?? false),
             AppSetting::DIAS_ALERTA_QUOTA => (int) ($data['dias_alerta_quota'] ?? 7),
+            AppSetting::LEMBRETES_AUTOMATICOS => (bool) ($data['lembretes_automaticos'] ?? false),
         ]);
 
         QuotaService::clearSituationCache();

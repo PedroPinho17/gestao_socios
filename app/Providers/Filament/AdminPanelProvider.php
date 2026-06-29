@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Clusters\CatalogosCluster;
 use App\Filament\Pages\ChangeRequiredPassword;
 use App\Filament\Pages\ClubSettingsPage;
+use App\Filament\Pages\CommunicationsPage;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\SystemSettingsPage;
 use App\Filament\Resources\ActivityLogs\ActivityLogResource;
@@ -78,6 +79,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
                 CatalogosCluster::class,
+                CommunicationsPage::class,
                 ClubSettingsPage::class,
                 SystemSettingsPage::class,
                 ChangeRequiredPassword::class,

@@ -24,6 +24,7 @@ class Member extends Model
         'notas',
         'cargo_cartao',
         'validade_manual',
+        'quota_reminder_due',
     ];
 
     protected function casts(): array
@@ -31,6 +32,7 @@ class Member extends Model
         return [
             'data_adesao' => 'date',
             'validade_manual' => 'date',
+            'quota_reminder_due' => 'date',
             'ativo' => 'boolean',
         ];
     }

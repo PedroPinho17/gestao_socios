@@ -12,6 +12,8 @@ class AppSetting extends Model
 
     public const DIAS_ALERTA_QUOTA = 'dias_alerta_quota';
 
+    public const LEMBRETES_AUTOMATICOS = 'lembretes_automaticos';
+
     protected $fillable = [
         'chave',
         'valor',

@@ -12,6 +12,7 @@ class AppSettingSeeder extends Seeder
         $defaults = [
             AppSetting::MFA_OBRIGATORIO => '0',
             AppSetting::DIAS_ALERTA_QUOTA => '7',
+            AppSetting::LEMBRETES_AUTOMATICOS => '0',
         ];
 
         foreach ($defaults as $chave => $valor) {
