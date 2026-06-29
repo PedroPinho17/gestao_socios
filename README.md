@@ -97,6 +97,7 @@ No `.env` só precisa de **APP_KEY** + **DB_*** + **APP_URL** (em produção) + 
 - **Conta de acesso** — na ficha do sócio, criar ou atualizar email/password para a área do sócio
 - **Planos de quota** — periodicidade, valor, regra de vencimento
 - **Pagamentos** — registo na ficha do sócio; ao registar, o comprovativo (PDF) é enviado automaticamente por email ao sócio. Cada pagamento tem ações **Comprovativo** (download) e **Enviar por email** (reenvio)
+- **Comunicações** — enviar email a sócios (todos, por estado de quota, ou selecionados) com assunto e mensagem; alternativa por WhatsApp gerando links `wa.me` com a mensagem preenchida (admin/imperador)
 - **Definições** — nome do clube, logótipo, cores e campos do cartão (título do painel usa o nome do clube)
 - **Sistema** — 2FA obrigatório, dias de aviso de quota (só imperador)
 - **Utilizadores** — criar/editar contas do backoffice (imperador: todos os perfis; administrador: admin e tesoureiro)
