@@ -12,7 +12,7 @@ final class MemberCardLayout
     public static function defaults(): array
     {
         return [
-            'template' => 'classic',
+            'template' => 'crc_vale',
             'orientation' => 'horizontal',
             'logo_position' => 'left',
             'photo_position' => 'right',
@@ -21,6 +21,8 @@ final class MemberCardLayout
             'numero_prefix' => '',
             'footer_text' => '',
             'verso_text' => '',
+            'card_motto' => 'TRADIÇÃO • ESPORTE • CULTURA',
+            'card_slogan' => 'Juntos Somos Mais Fortes',
             'show_qr_verso' => false,
             'qr_content' => 'validacao',
             'show_border' => false,
@@ -92,7 +94,21 @@ final class MemberCardLayout
      */
     public static function hasVerso(array $layout): bool
     {
+        if (($layout['template'] ?? '') === 'crc_vale') {
+            return true;
+        }
+
         return filled($layout['verso_text'] ?? '') || ($layout['show_qr_verso'] ?? false);
+    }
+
+    /**
+     * Nome do template Blade do verso (sem prefixo cards.templates.).
+     */
+    public static function versoTemplate(array $layout): string
+    {
+        $name = ($layout['template'] ?? '') === 'crc_vale' ? 'crc_vale_verso' : 'verso';
+
+        return view()->exists('cards.templates.'.$name) ? $name : 'verso';
     }
 
     public static function fontStack(string $family): string
@@ -113,6 +129,7 @@ final class MemberCardLayout
             'classic' => 'Clássico',
             'modern' => 'Moderno',
             'minimal' => 'Minimal',
+            'crc_vale' => 'CRC VALE (oficial)',
         ];
     }
 

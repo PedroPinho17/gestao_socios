@@ -149,6 +149,18 @@ class ClubSettingsPage extends Page
                             ->label('Legenda do cargo / extra')
                             ->default('Cargo')
                             ->live(onBlur: true),
+                        TextInput::make('card_layout.card_motto')
+                            ->label('Lema do cartão (cabeçalho)')
+                            ->placeholder('TRADIÇÃO • ESPORTE • CULTURA')
+                            ->maxLength(80)
+                            ->live(onBlur: true)
+                            ->visible(fn (Get $get): bool => ($get('card_layout.template') ?? 'classic') === 'crc_vale'),
+                        TextInput::make('card_layout.card_slogan')
+                            ->label('Slogan do cartão (rodapé)')
+                            ->placeholder('Juntos Somos Mais Fortes')
+                            ->maxLength(80)
+                            ->live(onBlur: true)
+                            ->visible(fn (Get $get): bool => ($get('card_layout.template') ?? 'classic') === 'crc_vale'),
                         Textarea::make('card_layout.footer_text')
                             ->label('Texto no rodapé')
                             ->placeholder('Válido mediante quota em dia')

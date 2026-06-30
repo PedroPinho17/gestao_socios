@@ -298,6 +298,13 @@ input {
   font-weight: 700;
 }
 
+.page-intro {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--ink-500);
+  line-height: 1.5;
+}
+
 .stack {
   display: grid;
   gap: 1rem;
@@ -539,6 +546,82 @@ input {
 .empty-state {
   margin-top: 1rem;
   color: var(--ink-500);
+}
+
+.payment-list {
+  margin-top: 1rem;
+}
+
+.payment-list__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.875rem;
+}
+
+.payment-card {
+  display: grid;
+  gap: 0.875rem;
+  padding: 1rem;
+  border: 1px solid var(--ink-200);
+  border-radius: 0.875rem;
+  background: #f8fafc;
+}
+
+.payment-card__main {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.payment-card__date {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-500);
+}
+
+.payment-card__valor {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink-900);
+  letter-spacing: -0.01em;
+}
+
+.payment-card__ref {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-700);
+}
+
+.payment-card__notas {
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-500);
+  line-height: 1.45;
+}
+
+.btn-receipt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: var(--club-primary);
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1rem;
+}
+
+.btn-receipt:hover:not(:disabled) {
+  opacity: 0.92;
+}
+
+.payment-receipt-btn__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
 }
 
 .pagination {

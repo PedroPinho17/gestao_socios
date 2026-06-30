@@ -18,7 +18,7 @@
     $side = $cardSide ?? 'front';
 @endphp
 @if ($side === 'back')
-    @include('cards.templates.verso')
+    @include('cards.templates.'.\App\Support\MemberCardLayout::versoTemplate($layout))
 @else
     @php
         $template = $layout['template'] ?? 'classic';

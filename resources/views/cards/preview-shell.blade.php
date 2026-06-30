@@ -7,6 +7,7 @@
             $template = 'classic';
         }
         $hasVerso = MemberCardLayout::hasVerso($layout);
+        $versoTemplate = MemberCardLayout::versoTemplate($layout);
     @endphp
     <div class="card-preview-row">
         <div class="card-preview-side">
@@ -19,7 +20,7 @@
             <div class="card-preview-side">
                 <p class="card-preview-side-label">Verso</p>
                 <div class="card-preview-scale">
-                    @include('cards.templates.verso')
+                    @include('cards.templates.'.$versoTemplate)
                 </div>
             </div>
         @endif

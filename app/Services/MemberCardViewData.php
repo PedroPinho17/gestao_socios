@@ -90,6 +90,8 @@ class MemberCardViewData
         $prefix = (string) ($layout['numero_prefix'] ?? '');
         $numeroFormatado = $prefix.$member->numero;
 
+        $showQr = ($layout['show_qr_verso'] ?? false) || ($layout['template'] ?? '') === 'crc_vale';
+
         return [
             'member' => $member,
             'settings' => $settings,
@@ -97,12 +99,31 @@ class MemberCardViewData
             'vencimentoLinha' => $vencimentoLinha,
             'planoLinha' => $planoLinha,
             'numeroFormatado' => $numeroFormatado,
+            'validadePeriodo' => $this->validadePeriodo($member),
             'logoDataUri' => $this->fileToDataUri($settings->logo_path),
             'fotoDataUri' => $this->fileToDataUri($member->foto_path),
-            'qrDataUri' => MemberCardQrCode::forMember($member, $layout),
+            'qrDataUri' => $showQr ? MemberCardQrCode::forMember($member, $layout) : null,
             'forExport' => $forExport,
             'withBleed' => $withBleed,
         ];
+    }
+
+    private function validadePeriodo(Member $member): string
+    {
+        $year = null;
+
+        if ($member->validade_manual) {
+            $year = (int) $member->validade_manual->format('Y');
+        } elseif ($member->exists) {
+            $situation = $this->quotaService->getSituation($member);
+            if ($situation['next_due'] !== null) {
+                $year = (int) $situation['next_due']->format('Y');
+            }
+        }
+
+        $year ??= (int) now()->format('Y');
+
+        return $year.'/'.($year + 1);
     }
 
     private function demoMember(): Member

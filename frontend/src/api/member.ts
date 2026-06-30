@@ -39,6 +39,18 @@ export async function getPayments(page = 1): Promise<PaginatedPayments> {
   return data;
 }
 
+function filenameFromContentDisposition(header: string | undefined): string | null {
+  if (!header) return null;
+
+  const utf8Match = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (utf8Match?.[1]) {
+    return decodeURIComponent(utf8Match[1]);
+  }
+
+  const match = /filename="?([^";]+)"?/i.exec(header);
+  return match?.[1] ?? null;
+}
+
 export async function downloadPaymentReceipt(paymentId: number): Promise<void> {
   const response = await api.get(`/me/payments/${paymentId}/receipt`, {
     responseType: 'blob',
@@ -48,7 +60,9 @@ export async function downloadPaymentReceipt(paymentId: number): Promise<void> {
   const url = window.URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `comprovativo_${paymentId}.pdf`;
+  link.download =
+    filenameFromContentDisposition(response.headers['content-disposition']) ??
+    `comprovativo_${paymentId}.pdf`;
   document.body.appendChild(link);
   link.click();
   link.remove();

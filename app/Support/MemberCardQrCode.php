@@ -64,7 +64,9 @@ final class MemberCardQrCode
      */
     public static function forMember(Member $member, array $layout): ?string
     {
-        if (! ($layout['show_qr_verso'] ?? false)) {
+        $showQr = ($layout['show_qr_verso'] ?? false) || ($layout['template'] ?? '') === 'crc_vale';
+
+        if (! $showQr) {
             return null;
         }
 

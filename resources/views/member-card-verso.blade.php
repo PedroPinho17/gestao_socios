@@ -66,7 +66,8 @@
     </div>
 
     <div class="card-wrap">
-        @include('cards.templates.verso')
+        @php $versoTemplate = \App\Support\MemberCardLayout::versoTemplate($layout); @endphp
+        @include('cards.templates.'.$versoTemplate)
     </div>
 
     <p class="footer" style="text-align:center;font-size:.75rem;color:#64748b;margin-top:1.5rem">{{ $layout['nome_clube'] }} — verso</p>

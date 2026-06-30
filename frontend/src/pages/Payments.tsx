@@ -48,6 +48,9 @@ export function PaymentsPage() {
     <div className="stack">
       <section className="card">
         <h2>Histórico de pagamentos</h2>
+        <p className="page-intro">
+          Consulte os pagamentos registados pelo clube. Em cada um pode descarregar o comprovativo em PDF.
+        </p>
         <PaymentList payments={payments} />
       </section>
 

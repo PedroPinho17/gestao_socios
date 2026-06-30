@@ -82,9 +82,9 @@ class ClubSetting extends Model
         return [
             'nome_clube' => 'O meu clube',
             'panel_primary_color' => '#10b981',
-            'card_gradient_from' => '#0f766e',
-            'card_gradient_to' => '#0f172a',
-            'card_accent_color' => '#d1fae5',
+            'card_gradient_from' => '#3d7ab8',
+            'card_gradient_to' => '#0c1a3a',
+            'card_accent_color' => '#c9a227',
             'card_titulo' => 'Sócio',
             'card_campo_extra_label' => 'Cargo',
             'show_proximo_vencimento' => true,

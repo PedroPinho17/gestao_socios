@@ -8,7 +8,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Caminho relativo à pasta public/ (ex.: img/vale_logo.png).
-    | O logótipo do cartão continua a ser carregado em Definições do clube.
+    | Usado no painel, login, validação QR, área do sócio e brasão do cartão CRC VALE.
     |
     */
 
