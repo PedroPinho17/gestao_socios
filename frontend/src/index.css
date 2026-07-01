@@ -1,5 +1,7 @@
 :root {
-  /* Cores de marca (usadas em FUNDOS/gradientes, nunca como texto direto) */
+  color-scheme: light;
+
+  /* Cores de marca (usadas em FUNDOS/gradientes, nunca como texto directo) */
   --club-primary: #0f766e;
   --club-gradient-from: #0f766e;
   --club-gradient-to: #0f172a;
@@ -89,6 +91,8 @@ input {
   padding: 0;
   overflow: hidden;
   border-top: 4px solid var(--club-primary);
+  background: #ffffff;
+  color: var(--ink-900);
 }
 
 .login-card--loading {
@@ -100,6 +104,8 @@ input {
   display: grid;
   gap: 1rem;
   padding: 1.25rem 1.5rem 1.5rem;
+  background: #ffffff;
+  color: var(--ink-900);
 }
 
 .member-area-unavailable__body {
@@ -314,11 +320,21 @@ input {
 }
 
 .card {
-  background: #fff;
+  background: #ffffff;
+  color: var(--ink-900);
   border: 1px solid var(--ink-200);
   border-radius: 1rem;
   padding: 1.25rem;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.card .muted,
+.card .eyebrow {
+  color: var(--ink-500);
+}
+
+.card .meta-list dd {
+  color: var(--ink-900);
 }
 
 .card > h2 {
@@ -367,8 +383,9 @@ input {
   border: 1px solid #cbd5e1;
   border-radius: 0.75rem;
   padding: 0.75rem 0.875rem;
-  background: #fff;
+  background: #ffffff;
   color: var(--ink-900);
+  color-scheme: light;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -507,18 +524,23 @@ input {
   border-radius: 0.875rem;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
+  color: var(--ink-900);
 }
 
 .highlight-box--accent {
-  border-color: color-mix(in srgb, var(--club-primary) 25%, #e2e8f0);
-  background: color-mix(in srgb, var(--club-primary) 6%, #fff);
+  border: 2px solid color-mix(in srgb, var(--club-primary) 45%, #e2e8f0);
+  background: #ffffff;
+}
+
+.highlight-box .eyebrow {
+  color: var(--ink-700);
 }
 
 .due-date {
   font-size: 1.75rem;
   font-weight: 700;
   margin-top: 0.25rem;
-  color: var(--ink-900);
+  color: var(--club-primary);
   letter-spacing: -0.01em;
 }
 
