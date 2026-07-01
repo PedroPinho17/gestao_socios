@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Members;
 
+use App\Filament\Concerns\RequiresModuleFeature;
 use App\Filament\Resources\Members\Pages\CreateMember;
 use App\Filament\Resources\Members\Pages\EditMember;
 use App\Filament\Resources\Members\Pages\ListMembers;
@@ -18,6 +19,8 @@ use UnitEnum;
 
 class MemberResource extends Resource
 {
+    use RequiresModuleFeature;
+
     protected static ?string $model = Member::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
@@ -33,6 +36,16 @@ class MemberResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'nome';
+
+    protected static function moduleFeatureKey(): string
+    {
+        return 'filament.members';
+    }
+
+    protected static function authorizeModuleFeatureAccess(): bool
+    {
+        return auth()->check();
+    }
 
     public static function form(Schema $schema): Schema
     {

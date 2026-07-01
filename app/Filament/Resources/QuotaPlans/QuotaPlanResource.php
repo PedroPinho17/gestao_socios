@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\QuotaPlans;
 
+use App\Filament\Concerns\RequiresModuleFeature;
 use App\Filament\Resources\QuotaPlans\Pages\ManageQuotaPlans;
 use App\Models\Periodicidade;
 use App\Models\QuotaPlan;
@@ -22,6 +23,8 @@ use UnitEnum;
 
 class QuotaPlanResource extends Resource
 {
+    use RequiresModuleFeature;
+
     protected static ?string $model = QuotaPlan::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
@@ -37,6 +40,16 @@ class QuotaPlanResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'nome';
+
+    protected static function moduleFeatureKey(): string
+    {
+        return 'filament.quota_plans';
+    }
+
+    protected static function authorizeModuleFeatureAccess(): bool
+    {
+        return auth()->check();
+    }
 
     public static function canCreate(): bool
     {

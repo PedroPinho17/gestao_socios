@@ -18,6 +18,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (axios.isAxiosError(error) && error.response?.status === 403) {
+      const data = error.response.data as { module?: string } | undefined;
+      if (data?.module === 'area_socio') {
+        clearStoredToken();
+        window.location.replace(window.location.origin + window.location.pathname);
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 export function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
 }

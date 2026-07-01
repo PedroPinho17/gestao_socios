@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ActivityLogs;
 
+use App\Filament\Concerns\RequiresModuleFeature;
 use App\Filament\Resources\ActivityLogs\Pages\ListActivityLogs;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -15,6 +16,8 @@ use UnitEnum;
 
 class ActivityLogResource extends Resource
 {
+    use RequiresModuleFeature;
+
     protected static ?string $model = Activity::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
@@ -29,7 +32,12 @@ class ActivityLogResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
-    public static function canAccess(): bool
+    protected static function moduleFeatureKey(): string
+    {
+        return 'filament.audit';
+    }
+
+    protected static function authorizeModuleFeatureAccess(): bool
     {
         return auth()->user()?->canViewAudit() ?? false;
     }

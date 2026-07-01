@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\ClubSetting;
+use App\Support\ModuleRegistry;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -105,6 +106,8 @@ final class ClubBranding
      *     accent_color: string,
      *     member_area_title: string,
      *     member_area_login_subtitle: string,
+     *     modules: array<string, bool>,
+     *     member_area_disabled_message: string,
      * }
      */
     public static function forMemberArea(): array
@@ -121,6 +124,8 @@ final class ClubBranding
                 'club.member_area.login_subtitle',
                 'Inicie sessão com o email e password do clube.',
             ),
+            'modules' => ModuleRegistry::activeMap(),
+            'member_area_disabled_message' => ModuleRegistry::disabledMessage(ModuleRegistry::AREA_SOCIO),
         ];
     }
 

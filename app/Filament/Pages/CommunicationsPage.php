@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\RequiresModuleFeature;
 use App\Enums\QuotaSituationKind;
 use App\Mail\ClubAnnouncementMail;
 use App\Models\Member;
@@ -30,6 +31,8 @@ use UnitEnum;
  */
 class CommunicationsPage extends Page
 {
+    use RequiresModuleFeature;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
 
     protected static ?string $navigationLabel = 'Comunicações';
@@ -49,7 +52,12 @@ class CommunicationsPage extends Page
      */
     public array $whatsappLinks = [];
 
-    public static function canAccess(): bool
+    protected static function moduleFeatureKey(): string
+    {
+        return 'filament.communications';
+    }
+
+    protected static function authorizeModuleFeatureAccess(): bool
     {
         return auth()->user()?->canManageClub() ?? false;
     }

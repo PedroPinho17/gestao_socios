@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Users;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Concerns\RequiresModuleFeature;
 use App\Models\Permissao;
 use App\Models\User;
 use BackedEnum;
@@ -26,6 +27,8 @@ use UnitEnum;
 
 class UserResource extends Resource
 {
+    use RequiresModuleFeature;
+
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
@@ -42,7 +45,12 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function canAccess(): bool
+    protected static function moduleFeatureKey(): string
+    {
+        return 'filament.users';
+    }
+
+    protected static function authorizeModuleFeatureAccess(): bool
     {
         return auth()->user()?->canManageUsers() ?? false;
     }

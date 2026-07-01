@@ -2,7 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Concerns\RequiresModuleFeature;
 use App\Models\ClubSetting;
+use App\Support\ModuleRegistry;
 use App\Services\MemberCardViewData;
 use App\Support\MemberCardLayout;
 use App\Support\MemberCardQrCode;
@@ -30,6 +32,8 @@ use UnitEnum;
  */
 class ClubSettingsPage extends Page
 {
+    use RequiresModuleFeature;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCog6Tooth;
 
     protected static ?string $navigationLabel = 'Definições';
@@ -40,7 +44,12 @@ class ClubSettingsPage extends Page
 
     protected static ?int $navigationSort = 8;
 
-    public static function canAccess(): bool
+    protected static function moduleFeatureKey(): string
+    {
+        return 'filament.club_settings';
+    }
+
+    protected static function authorizeModuleFeatureAccess(): bool
     {
         return auth()->user()?->canManageClub() ?? false;
     }
@@ -79,6 +88,7 @@ class ClubSettingsPage extends Page
                     ]),
                 Section::make('Layout do cartão')
                     ->columns(2)
+                    ->visible(fn (): bool => ModuleRegistry::enabled(ModuleRegistry::CARTOES))
                     ->schema([
                         Select::make('card_layout.template')
                             ->label('Modelo')
@@ -112,6 +122,7 @@ class ClubSettingsPage extends Page
                     ]),
                 Section::make('Cores e estilo')
                     ->columns(2)
+                    ->visible(fn (): bool => ModuleRegistry::enabled(ModuleRegistry::CARTOES))
                     ->schema([
                         ColorPicker::make('card_gradient_from')
                             ->label('Cor inicial do gradiente')
@@ -140,6 +151,7 @@ class ClubSettingsPage extends Page
                     ]),
                 Section::make('Textos do cartão')
                     ->columns(2)
+                    ->visible(fn (): bool => ModuleRegistry::enabled(ModuleRegistry::CARTOES))
                     ->schema([
                         TextInput::make('card_titulo')
                             ->label('Rótulo acima do nome')
@@ -188,6 +200,7 @@ class ClubSettingsPage extends Page
                     ]),
                 Section::make('Campos visíveis')
                     ->columns(2)
+                    ->visible(fn (): bool => ModuleRegistry::enabled(ModuleRegistry::CARTOES))
                     ->schema([
                         Toggle::make('card_layout.show_nome')->label('Nome')->default(true),
                         Toggle::make('card_layout.show_numero')->label('Número de sócio')->default(true),

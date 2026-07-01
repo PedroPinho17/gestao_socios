@@ -14,6 +14,8 @@ class AppSetting extends Model
 
     public const LEMBRETES_AUTOMATICOS = 'lembretes_automaticos';
 
+    public const MODULOS_ATIVOS = 'modulos_ativos';
+
     protected $fillable = [
         'chave',
         'valor',
@@ -47,6 +49,28 @@ class AppSetting extends Model
     public static function int(string $key, int $default = 0): int
     {
         return (int) static::get($key, $default);
+    }
+
+    public static function json(string $key, mixed $default = null): mixed
+    {
+        $raw = static::get($key);
+
+        if ($raw === null || $raw === '') {
+            return $default;
+        }
+
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        $decoded = json_decode((string) $raw, true);
+
+        return json_last_error() === JSON_ERROR_NONE ? $decoded : $default;
+    }
+
+    public static function setJson(string $key, mixed $value): void
+    {
+        static::set($key, json_encode($value, JSON_UNESCAPED_UNICODE));
     }
 
     public static function set(string $key, mixed $value): void

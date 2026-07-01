@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Periodicidades;
 
 use App\Filament\Clusters\CatalogosCluster;
+use App\Filament\Concerns\RequiresModuleFeature;
 use App\Filament\Resources\Periodicidades\Pages\ManagePeriodicidades;
 use App\Models\Periodicidade;
 use BackedEnum;
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PeriodicidadeResource extends Resource
 {
+    use RequiresModuleFeature;
+
     protected static ?string $model = Periodicidade::class;
 
     protected static ?string $cluster = CatalogosCluster::class;
@@ -35,7 +38,12 @@ class PeriodicidadeResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    public static function canAccess(): bool
+    protected static function moduleFeatureKey(): string
+    {
+        return 'filament.periodicidades';
+    }
+
+    protected static function authorizeModuleFeatureAccess(): bool
     {
         return auth()->user()?->canManageClub() ?? false;
     }

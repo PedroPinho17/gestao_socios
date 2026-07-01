@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\TiposVencimentoQuota;
 
 use App\Filament\Clusters\CatalogosCluster;
+use App\Filament\Concerns\RequiresModuleFeature;
 use App\Filament\Resources\TiposVencimentoQuota\Pages\ManageTiposVencimentoQuota;
 use App\Models\TipoVencimentoQuota;
 use BackedEnum;
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class TipoVencimentoQuotaResource extends Resource
 {
+    use RequiresModuleFeature;
+
     protected static ?string $model = TipoVencimentoQuota::class;
 
     protected static ?string $cluster = CatalogosCluster::class;
@@ -35,7 +38,12 @@ class TipoVencimentoQuotaResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    public static function canAccess(): bool
+    protected static function moduleFeatureKey(): string
+    {
+        return 'filament.tipos_vencimento';
+    }
+
+    protected static function authorizeModuleFeatureAccess(): bool
     {
         return auth()->user()?->canManageClub() ?? false;
     }

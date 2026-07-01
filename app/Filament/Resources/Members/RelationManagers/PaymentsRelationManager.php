@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Members\RelationManagers;
 
 use App\Mail\PaymentReceiptMail;
 use App\Models\Payment;
+use App\Support\ModuleRegistry;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -82,17 +83,19 @@ class PaymentsRelationManager extends RelationManager
                         return $data;
                     })
                     ->after(function (Payment $record): void {
-                        static::sendReceiptEmail($record, automatic: true);
+                        if (ModuleRegistry::enabled(ModuleRegistry::COMPROVATIVOS)) {
+                            static::sendReceiptEmail($record, automatic: true);
+                        }
                     }),
             ])
-            ->recordActions([
-                Action::make('comprovativo')
+            ->recordActions(array_values(array_filter([
+                ModuleRegistry::enabled(ModuleRegistry::COMPROVATIVOS) ? Action::make('comprovativo')
                     ->label('Comprovativo')
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('success')
                     ->url(fn ($record): string => route('payments.receipt.pdf', $record))
-                    ->openUrlInNewTab(),
-                Action::make('enviar_email')
+                    ->openUrlInNewTab() : null,
+                ModuleRegistry::enabled(ModuleRegistry::COMPROVATIVOS) ? Action::make('enviar_email')
                     ->label('Enviar por email')
                     ->icon('heroicon-o-envelope')
                     ->color('gray')
@@ -103,10 +106,10 @@ class PaymentsRelationManager extends RelationManager
                         : 'Este sócio não tem email definido na ficha.')
                     ->action(function (Payment $record): void {
                         static::sendReceiptEmail($record, automatic: false);
-                    }),
+                    }) : null,
                 EditAction::make(),
                 DeleteAction::make(),
-            ])
+            ])))
             ->defaultSort('data', 'desc');
     }
 

@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\AppSetting;
 use App\Services\QuotaService;
+use App\Support\ModuleRegistry;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
@@ -31,7 +32,7 @@ class SystemSettingsPage extends Page
 
     protected static string|UnitEnum|null $navigationGroup = 'Configuração';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 6;
 
     protected string $view = 'filament.pages.system-settings';
 
@@ -74,6 +75,7 @@ class SystemSettingsPage extends Page
                             ->helperText('Sócios dentro deste prazo aparecem como «vence em breve» no painel e filtros.'),
                         Toggle::make('lembretes_automaticos')
                             ->label('Lembretes automáticos de quota por email')
+                            ->visible(fn (): bool => ModuleRegistry::enabled(ModuleRegistry::LEMBRETES))
                             ->helperText('Quando activo, envia automaticamente um email ao sócio quando a quota está dentro do prazo de aviso acima e ainda não foi paga (uma vez por vencimento). Requer o agendador (cron) configurado.'),
                     ]),
             ])

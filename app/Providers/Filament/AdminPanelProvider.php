@@ -10,6 +10,8 @@ use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\SystemSettingsPage;
 use App\Filament\Resources\ActivityLogs\ActivityLogResource;
 use App\Filament\Resources\Members\MemberResource;
+use App\Filament\Resources\ModuleFeatures\ModuleFeatureResource;
+use App\Filament\Resources\Modules\ModuleResource;
 use App\Filament\Resources\Periodicidades\PeriodicidadeResource;
 use App\Filament\Resources\QuotaPlans\QuotaPlanResource;
 use App\Filament\Resources\TiposVencimentoQuota\TipoVencimentoQuotaResource;
@@ -71,6 +73,8 @@ class AdminPanelProvider extends PanelProvider
             ->resources([
                 MemberResource::class,
                 QuotaPlanResource::class,
+                ModuleResource::class,
+                ModuleFeatureResource::class,
                 PeriodicidadeResource::class,
                 TipoVencimentoQuotaResource::class,
                 UserResource::class,

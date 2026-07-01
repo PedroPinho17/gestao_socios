@@ -102,6 +102,34 @@ input {
   padding: 1.25rem 1.5rem 1.5rem;
 }
 
+.member-area-unavailable__body {
+  text-align: center;
+}
+
+.member-area-unavailable__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--club-primary) 12%, white);
+  color: var(--club-primary);
+}
+
+.member-area-unavailable__title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+.member-area-unavailable__text {
+  margin: 0;
+  color: var(--ink-500);
+  line-height: 1.55;
+}
+
 .change-password-title {
   font-size: 1.25rem;
 }

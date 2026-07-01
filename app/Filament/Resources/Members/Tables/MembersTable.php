@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Members\Tables;
 use App\Filament\Resources\Members\Actions\CreateMemberAccountAction;
 use App\Models\Member;
 use App\Services\QuotaService;
+use App\Support\ModuleRegistry;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
@@ -97,25 +98,25 @@ class MembersTable
                     ]),
             ])
             ->recordActions([
-                ActionGroup::make([
+                ActionGroup::make(array_values(array_filter([
                     EditAction::make(),
-                    CreateMemberAccountAction::make(),
-                    Action::make('cartao')
+                    ModuleRegistry::enabled(ModuleRegistry::AREA_SOCIO) ? CreateMemberAccountAction::make() : null,
+                    ModuleRegistry::enabled(ModuleRegistry::CARTOES) ? Action::make('cartao')
                         ->label('Ver cartão')
                         ->icon('heroicon-o-identification')
                         ->url(fn (Member $record): string => route('member.card', $record))
-                        ->openUrlInNewTab(),
-                    Action::make('cartao_pdf')
+                        ->openUrlInNewTab() : null,
+                    ModuleRegistry::enabled(ModuleRegistry::CARTOES) ? Action::make('cartao_pdf')
                         ->label('Cartão PDF')
                         ->icon('heroicon-o-document-arrow-down')
                         ->url(fn (Member $record): string => route('member.card.pdf', $record))
-                        ->openUrlInNewTab(),
-                    Action::make('cartao_png')
+                        ->openUrlInNewTab() : null,
+                    ModuleRegistry::enabled(ModuleRegistry::CARTOES) ? Action::make('cartao_png')
                         ->label('Cartão PNG')
                         ->icon('heroicon-o-photo')
                         ->url(fn (Member $record): string => route('member.card.png', $record))
-                        ->openUrlInNewTab(),
-                ]),
+                        ->openUrlInNewTab() : null,
+                ]))),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

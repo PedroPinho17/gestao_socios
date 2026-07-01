@@ -6,6 +6,7 @@ use App\Enums\QuotaSituationKind;
 use App\Mail\QuotaReminderMail;
 use App\Models\AppSetting;
 use App\Models\Member;
+use App\Support\ModuleRegistry;
 use App\Services\QuotaService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -20,6 +21,12 @@ class SendQuotaReminders extends Command
     public function handle(QuotaService $quotaService): int
     {
         $dryRun = (bool) $this->option('dry-run');
+
+        if (! $dryRun && ! ModuleRegistry::enabled(ModuleRegistry::LEMBRETES)) {
+            $this->info('Módulo de lembretes desactivado (Configuração → Sistema). Nada a fazer.');
+
+            return self::SUCCESS;
+        }
 
         if (! $dryRun && ! AppSetting::bool(AppSetting::LEMBRETES_AUTOMATICOS)) {
             $this->info('Lembretes automáticos desligados (Configuração → Sistema). Nada a fazer.');

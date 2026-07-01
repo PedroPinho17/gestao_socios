@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(PermissaoSeeder::class);
         $this->call(AppSettingSeeder::class);
+        $this->call(ModuleSeeder::class);
 
         if (app()->environment('local')) {
             $this->seedDemoUsers();

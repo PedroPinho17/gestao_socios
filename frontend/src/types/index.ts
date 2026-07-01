@@ -7,6 +7,8 @@ export interface ClubBranding {
   accent_color: string;
   member_area_title: string;
   member_area_login_subtitle: string;
+  member_area_disabled_message?: string;
+  modules?: Record<string, boolean>;
 }
 
 export type QuotaStatus = 'ok' | 'due_soon' | 'overdue' | 'sem_plano' | 'inativo';
