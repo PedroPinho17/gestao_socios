@@ -83,6 +83,8 @@ Os perfis ficam na tabela `permissoes` (IDs fixos: 1 Imperador, 2 Administrador,
 | `CORS_ALLOWED_ORIGINS` (URL do frontend React) | Contas de acesso dos sócios (email/password na ficha do sócio) |
 | `CLUB_LOGO` (fallback em `public/`) | 2FA obrigatório, dias de alerta de quota (`app_settings` → **Sistema**, só imperador) |
 | `MAIL_*` (SMTP para envio de comprovativos) | |
+| `SENTRY_LARAVEL_DSN` (erros em produção — opcional) | |
+| `HEALTHCHECKS_QUOTA_REMINDERS_URL` (ping do cron de lembretes — opcional) | |
 | `CLUB_MEMBER_AREA_*` (textos opcionais da área do sócio) | Planos de quota, sócios, pagamentos |
 | `BROWSERSHOT_*` (opcional — export PDF/PNG profissional) | |
 
@@ -225,6 +227,85 @@ Está agendado para correr **todos os dias às 09:00** (`routes/console.php`). P
 
 > Nota: o WhatsApp **não** é enviado automaticamente — o envio gratuito por `wa.me` exige confirmação manual. Para WhatsApp/SMS automáticos é necessário um fornecedor pago (Twilio/Meta).
 
+## Infraestrutura (monitoring, CDN, ficheiros)
+
+Reforço da stack actual (Laravel + Filament + React), **sem trocar tecnologia**. Ordem recomendada:
+
+| Fase | Quando | O quê |
+|------|--------|-------|
+| **1 — Monitoring** | Já / produção | Sentry, UptimeRobot, Healthchecks.io |
+| **2 — CDN** | Deploy com domínio real | Cloudflare DNS, SSL, cache de assets |
+| **3 — Object Storage** | Cliente real + volume | Cloudflare R2 (fotos, logótipos, cartões) |
+
+### Fase 1 — Monitoring (implementado no código)
+
+#### Sentry (erros Laravel + React)
+
+1. Crie conta em [sentry.io](https://sentry.io) — projeto **Laravel** e projeto **React**.
+2. **Backend** — no `.env` de produção:
+
+```env
+SENTRY_LARAVEL_DSN=https://xxx@xxx.ingest.sentry.io/xxx
+SENTRY_TRACES_SAMPLE_RATE=0.1
+```
+
+Pacote: `sentry/sentry-laravel` (config em `config/sentry.php`). Sem DSN, o Sentry fica inactivo.
+
+3. **Frontend** — no `frontend/.env` antes do build:
+
+```env
+VITE_SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
+```
+
+Arranque em `frontend/src/monitoring/sentry.ts`. Rebuild: `npm run build`.
+
+4. **Teste:** provoque um erro (ex.: rota inexistente com excepção) e confirme no dashboard Sentry.
+
+#### UptimeRobot (site online?)
+
+Monitores sugeridos (intervalo 1–5 min, alerta email/Telegram):
+
+| URL | Valida |
+|-----|--------|
+| `https://app.seuclube.pt/up` | Backend Laravel (health check nativo) |
+| `https://socios.seuclube.pt/` | Frontend React servido |
+| `https://app.seuclube.pt/api/branding` | API mínima (opcional) |
+
+Configuração **só na consola** [UptimeRobot](https://uptimerobot.com) — nada no código.
+
+#### Healthchecks.io (cron dos lembretes)
+
+Confirma que o agendador corre **todos os dias às 09:00**, mesmo que nenhum email seja enviado.
+
+1. Crie um check em [healthchecks.io](https://healthchecks.io) (grace ~1 h após 09:00).
+2. No `.env`:
+
+```env
+HEALTHCHECKS_QUOTA_REMINDERS_URL=https://hc-ping.com/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+3. O comando `gestao:send-quota-reminders` faz ping automaticamente no fim (excepto `--dry-run`).
+
+Teste manual: `php artisan gestao:send-quota-reminders` (sem dry-run) com o URL configurado.
+
+### Fase 2 — Cloudflare (no deploy)
+
+1. Adicionar domínio ao Cloudflare; apontar nameservers.
+2. Registos: `app.seuclube.pt` → backend, `socios.seuclube.pt` → frontend.
+3. SSL **Full (strict)** + **Always Use HTTPS**.
+4. Cache em assets estáticos do React (`*.js`, `*.css`, imagens públicas).
+5. **Não cachear:** `/admin/*`, `/api/*`, sessões autenticadas, ficheiros privados.
+6. `CORS_ALLOWED_ORIGINS=https://socios.seuclube.pt` (URL exacto do frontend).
+
+### Fase 3 — Object Storage R2 (mais tarde)
+
+Quando houver cliente real, muitas fotos/cartões ou migração de VPS:
+
+- Disco `r2` já preparado em `config/filesystems.php`.
+- Variáveis comentadas no `.env.example` (`R2_*`, `FILESYSTEM_DISK=r2`).
+- Migrar gradualmente `Storage::disk('local')` → `Storage::disk('r2')` (fotos, logótipos).
+- Manter rotas autenticadas para ficheiros privados.
+
 ## Deploy no cPanel
 
 ### Backend
@@ -247,6 +328,10 @@ DB_USERNAME=utilizador
 DB_PASSWORD=password
 
 CORS_ALLOWED_ORIGINS=https://socios.seuclube.pt
+
+# Monitoring (recomendado em produção)
+SENTRY_LARAVEL_DSN=https://xxx@xxx.ingest.sentry.io/xxx
+HEALTHCHECKS_QUOTA_REMINDERS_URL=https://hc-ping.com/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 5. No terminal SSH do cPanel (ou tarefa única):
@@ -274,6 +359,7 @@ Num subdomínio separado (ex. `socios.seuclube.pt`):
 cd frontend
 cp .env.example .env
 # VITE_API_URL=https://app.seuclube.pt/api
+# VITE_SENTRY_DSN=https://xxx@xxx.ingest.sentry.io/xxx
 npm ci
 npm run build
 ```
@@ -341,7 +427,12 @@ app/
     Api/             — autenticação e dados da área do sócio
   Models/            — sócios, planos, pagamentos, definições
   Services/          — quotas, cartões, contas de sócio
+  Support/           — branding, módulos, healthchecks (monitoring)
+config/
+  monitoring.php     — URLs Healthchecks.io
+  sentry.php         — Sentry Laravel (DSN via .env)
 frontend/            — SPA React (área do sócio)
+  src/monitoring/    — Sentry React
   src/api/           — cliente HTTP (Sanctum Bearer)
   src/pages/         — login, dashboard, pagamentos
 resources/views/
