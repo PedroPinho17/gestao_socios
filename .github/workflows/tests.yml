@@ -44,4 +44,53 @@ jobs:
         run: php artisan key:generate
 
       - name: Execute tests
-        run: php artisan test
+        run: php artisan test --no-coverage
+
+  coverage:
+    name: Code coverage
+    runs-on: ubuntu-latest
+    needs: tests
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          coverage: pcov
+          ini-values: pcov.directory=${{ github.workspace }}
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Copy environment file
+        run: cp .env.example .env
+
+      - name: Generate app key
+        run: php artisan key:generate
+
+      - name: Run tests with coverage
+        run: |
+          mkdir -p build/coverage
+          vendor/bin/phpunit --colors=never --coverage-text --coverage-cobertura build/coverage/cobertura.xml | tee build/coverage/summary.txt
+
+      - name: Publish coverage summary
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: build/coverage/cobertura.xml
+          badge: true
+          fail_below_min: false
+          format: markdown
+          hide_branch_rate: false
+          hide_complexity: true
+          indicators: true
+          output: both
+          thresholds: '50 80'

@@ -11,6 +11,8 @@ Sistema para clubes gerirem sócios, quotas, pagamentos e cartões de sócio.
 - Composer
 - Node.js 20+ e npm (área do sócio; opcionalmente exportação profissional de cartões)
 - MySQL/MariaDB (produção / cPanel) ou SQLite (desenvolvimento local)
+- **Testes locais:** `pdo_sqlite` (PHPUnit usa SQLite em memória). No Windows, active `sqlite3` e `pdo_sqlite` no `php.ini`, ou use o script `scripts/run-tests.ps1`
+- **Cobertura local (opcional):** extensão PCOV
 
 ## Instalação local
 
@@ -49,6 +51,73 @@ composer run dev
 ```
 
 Isto corre o servidor Laravel, fila, logs e Vite dos assets do painel. A área do sócio continua a precisar de `npm run dev` em `frontend/` noutro terminal.
+
+### Instalação completa (1 comando)
+
+```bash
+composer run setup
+```
+
+Corre `composer install`, cria `.env`, gera a chave, migra a base de dados, instala dependências npm e compila assets do painel.
+
+## Testes e qualidade
+
+A suite PHPUnit cobre a lógica crítica da plataforma: quotas, importação/exportação de sócios, módulos, relatórios, comprovativos, API da área do sócio e middleware de activação de módulos.
+
+| Métrica | Valor |
+|---------|-------|
+| Testes | **71** |
+| Asserções | **168+** |
+| PHP (CI) | 8.3, 8.4, 8.5 |
+
+### Executar localmente
+
+**Linux / macOS / Git Bash:**
+
+```bash
+composer test
+# ou
+php artisan test
+```
+
+**Windows (PowerShell):**
+
+```powershell
+.\scripts\run-tests.ps1
+```
+
+O script activa automaticamente as extensões SQLite necessárias. Com PCOV instalado:
+
+```powershell
+.\scripts\run-tests.ps1 -Coverage
+```
+
+Gera relatório em `build/coverage/cobertura.xml`.
+
+### O que está coberto
+
+| Área | Exemplos |
+|------|----------|
+| **Quotas** | Situação (em dia, a vencer, atraso, inactivo), dia fixo vs aniversário, alertas |
+| **Importação** | Excel válido, erros de validação, pagamentos múltiplos |
+| **Exportação** | Formato compatível com importação |
+| **Módulos** | `ModuleRegistry`, `FeatureRegistry`, middleware `module:` |
+| **API sócio** | Login, logout, password, quota, pagamentos, comprovativos |
+| **Relatórios** | Sócios pagantes e em atraso |
+| **Validação QR** | URL assinada e estado do sócio |
+
+### CI (GitHub Actions)
+
+Em cada **push** e **pull request**, o workflow `.github/workflows/tests.yml`:
+
+1. **tests** — corre a suite completa em PHP 8.3, 8.4 e 8.5
+2. **coverage** — após os testes passarem, gera cobertura de código (PCOV) e publica:
+   - resumo na aba **Summary** do job *Code coverage*
+   - comentário no PR com percentagens (linhas, métodos, classes)
+
+Indicadores de cor no comentário: vermelho &lt; 50%, amarelo 50–80%, verde &gt; 80% (não bloqueia o merge por defeito).
+
+> PRs de forks externos podem não receber comentário automático (limitação do GitHub); o summary do job continua disponível.
 
 ### Performance local (Windows)
 
@@ -407,6 +476,8 @@ php artisan route:cache
 php artisan view:cache
 ```
 
+Antes do deploy, confirme que os testes passam localmente (`composer test` ou `.\scripts\run-tests.ps1`). O CI valida automaticamente em cada PR.
+
 6. Permissões de escrita em `storage/` e `bootstrap/cache/`.
 7. Active HTTPS (Let's Encrypt no cPanel).
 
@@ -481,22 +552,35 @@ Na ficha do sócio (**Sócios → editar**), use **Criar conta de acesso** (ou *
 
 ```
 app/
-  Filament/          — painel administrativo
-  Http/Controllers/
-    Api/             — autenticação e dados da área do sócio
-  Models/            — sócios, planos, pagamentos, definições
-  Services/          — quotas, cartões, contas de sócio
-  Support/           — branding, módulos, healthchecks (monitoring)
+  Modules/           — código por domínio (Members, Auth, Payments, Reports, …)
+    {Modulo}/
+      Filament/      — resources, pages, widgets do painel
+      Http/          — controllers e middleware
+      Services/      — regras de negócio
+      Models/        — Eloquent
+      routes.php     — rotas do módulo (quando aplicável)
+  Http/              — controllers legacy / partilhados, middleware global
+  Models/            — modelos transversais (Module, ClubSetting, AppSetting)
+  Support/           — ModuleRegistry, FeatureRegistry, branding, healthchecks
+  Providers/         — Filament, módulos, bootstrap da app
 config/
   monitoring.php     — URLs Healthchecks.io
   sentry.php         — Sentry Laravel (DSN via .env)
 frontend/            — SPA React (área do sócio)
-  src/monitoring/    — Sentry React
   src/api/           — cliente HTTP (Sanctum Bearer)
   src/pages/         — login, dashboard, pagamentos
+  src/monitoring/    — Sentry React
 resources/views/
   cards/             — templates do cartão de sócio
 routes/
-  api.php            — API da área do sócio
-  web.php            — cartões, validação QR, ficheiros seguros
+  api.php            — branding público
+  web.php            — redirect, PWA, branding logo
+tests/
+  Unit/              — QuotaService, importação, módulos, relatórios, …
+  Feature/           — API, middleware, validação QR, acesso staff
+  Concerns/          — helpers partilhados (CreatesClubFixtures)
+scripts/
+  run-tests.ps1      — testes no Windows (SQLite + cobertura opcional)
+.github/workflows/
+  tests.yml          — testes multi-PHP + cobertura em PRs
 ```

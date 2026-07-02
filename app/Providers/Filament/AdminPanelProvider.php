@@ -71,7 +71,7 @@ class AdminPanelProvider extends PanelProvider
                 '/cartao/*',
                 '/relatorios/*',
             ])
-            ->colors([
+            ->colors(fn (): array => [
                 'primary' => Color::hex(
                     once(fn (): string => ClubSetting::current()->panel_primary_color ?? '#10b981'),
                 ),

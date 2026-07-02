@@ -72,14 +72,16 @@ class FeatureRegistryTest extends TestCase
     {
         $definition = ModuleRegistry::catalog()[$slug];
 
-        return Module::query()->create([
-            'slug' => $slug,
-            'label' => $definition['label'],
-            'description' => $definition['description'] ?? null,
-            'enabled' => $enabled,
-            'is_core' => (bool) ($definition['core'] ?? false),
-            'sort_order' => 10,
-        ]);
+        return Module::query()->updateOrCreate(
+            ['slug' => $slug],
+            [
+                'label' => $definition['label'],
+                'description' => $definition['description'] ?? null,
+                'enabled' => $enabled,
+                'is_core' => (bool) ($definition['core'] ?? false),
+                'sort_order' => 10,
+            ],
+        );
     }
 
     protected function createFeature(Module $module, string $key, bool $enabled, bool $isCore = false): ModuleFeature

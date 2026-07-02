@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Modules\Members\Models\Member;
 use App\Modules\Members\Models\Periodicidade;
 use App\Modules\Members\Models\QuotaPlan;
+use App\Modules\Members\Models\TipoVencimentoQuota;
 use App\Modules\Members\Services\MemberExportService;
 use App\Modules\Members\Support\MemberImportColumnMap;
 use App\Modules\Payments\Models\Payment;
@@ -67,7 +68,7 @@ class MemberExportServiceTest extends TestCase
         $this->assertSame('Ana Exportada', $rows[1][1]);
         $this->assertSame('2026-01', $rows[1][12]);
         $this->assertSame('5', $rows[2][0]);
-        $this->assertSame('', $rows[2][1]);
+        $this->assertEmpty($rows[2][1]);
         $this->assertSame('2026-02', $rows[2][12]);
 
         @unlink($path);

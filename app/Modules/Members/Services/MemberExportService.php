@@ -14,7 +14,7 @@ class MemberExportService
         $rows = [MemberImportColumnMap::templateHeaders()];
 
         Member::query()
-            ->with(['quotaPlan', 'payments' => fn ($query) => $query->orderBy('data')->orderBy('id')])
+            ->with(['quotaPlan', 'payments' => fn ($query) => $query->reorder()->orderBy('data')->orderBy('id')])
             ->orderByRaw('CAST(numero AS UNSIGNED), numero')
             ->lazy(100)
             ->each(function (Member $member) use (&$rows): void {
