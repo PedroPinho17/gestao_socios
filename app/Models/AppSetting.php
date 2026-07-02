@@ -14,6 +14,8 @@ class AppSetting extends Model
 
     public const LEMBRETES_AUTOMATICOS = 'lembretes_automaticos';
 
+    public const PASSKEYS_ATIVAS = 'passkeys_ativas';
+
     public const MODULOS_ATIVOS = 'modulos_ativos';
 
     protected $fillable = [

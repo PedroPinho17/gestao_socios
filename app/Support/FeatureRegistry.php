@@ -2,17 +2,17 @@
 
 namespace App\Support;
 
-use App\Filament\Clusters\CatalogosCluster;
-use App\Filament\Pages\ClubSettingsPage;
-use App\Filament\Pages\CommunicationsPage;
-use App\Filament\Resources\ActivityLogs\ActivityLogResource;
-use App\Filament\Resources\Members\MemberResource;
-use App\Filament\Resources\Periodicidades\PeriodicidadeResource;
-use App\Filament\Resources\QuotaPlans\QuotaPlanResource;
-use App\Filament\Resources\TiposVencimentoQuota\TipoVencimentoQuotaResource;
-use App\Filament\Resources\Users\UserResource;
 use App\Models\Module;
 use App\Models\ModuleFeature;
+use App\Modules\Audit\Filament\Resources\ActivityLogs\ActivityLogResource;
+use App\Modules\Auth\Filament\Resources\Users\UserResource;
+use App\Modules\Catalogos\Filament\Clusters\CatalogosCluster;
+use App\Modules\Catalogos\Filament\Resources\Periodicidades\PeriodicidadeResource;
+use App\Modules\Catalogos\Filament\Resources\TiposVencimentoQuota\TipoVencimentoQuotaResource;
+use App\Modules\Members\Filament\Resources\Members\MemberResource;
+use App\Modules\Members\Filament\Resources\QuotaPlans\QuotaPlanResource;
+use App\Modules\Notifications\Filament\Pages\CommunicationsPage;
+use App\Modules\Settings\Filament\Pages\ClubSettingsPage;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
@@ -40,6 +40,7 @@ final class FeatureRegistry
                 'module' => ModuleRegistry::SOCIOS,
                 'binding_type' => 'filament_resource',
                 'binding_target' => MemberResource::class,
+                'is_core' => true,
             ],
             'filament.quota_plans' => [
                 'label' => 'Planos de quota',
@@ -174,6 +175,8 @@ final class FeatureRegistry
             'description' => $definition['description'] ?? null,
             'binding_type' => $definition['binding_type'] ?? null,
             'binding_target' => $definition['binding_target'] ?? null,
+            'is_core' => (bool) ($definition['is_core'] ?? false),
+            'enabled' => true,
         ];
     }
 
@@ -186,7 +189,7 @@ final class FeatureRegistry
         $feature = self::allCached()->firstWhere('key', $key);
 
         if ($feature instanceof ModuleFeature) {
-            return $feature->module?->isEnabled() ?? false;
+            return $feature->isEffectivelyEnabled();
         }
 
         $catalog = self::catalog()[$key] ?? null;
@@ -276,6 +279,8 @@ final class FeatureRegistry
                 'binding_type' => $definition['binding_type'] ?? null,
                 'binding_target' => $definition['binding_target'] ?? null,
                 'is_system' => true,
+                'enabled' => true,
+                'is_core' => (bool) ($definition['is_core'] ?? false),
                 'sort_order' => $sort += 10,
             ]);
 
@@ -305,6 +310,8 @@ final class FeatureRegistry
                 'binding_type',
                 'binding_target',
                 'is_system',
+                'enabled',
+                'is_core',
                 'sort_order',
             ]))
             ->values()

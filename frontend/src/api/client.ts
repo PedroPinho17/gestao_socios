@@ -21,11 +21,21 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 403) {
-      const data = error.response.data as { module?: string } | undefined;
-      if (data?.module === 'area_socio') {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
         clearStoredToken();
-        window.location.replace(window.location.origin + window.location.pathname);
+        if (!window.location.pathname.startsWith('/login')) {
+          window.location.replace('/login');
+        }
+        return Promise.reject(error);
+      }
+
+      if (error.response?.status === 403) {
+        const data = error.response.data as { module?: string } | undefined;
+        if (data?.module === 'area_socio') {
+          clearStoredToken();
+          window.location.replace(window.location.origin + window.location.pathname);
+        }
       }
     }
     return Promise.reject(error);

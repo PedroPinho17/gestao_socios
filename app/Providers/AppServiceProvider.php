@@ -2,13 +2,14 @@
 
 namespace App\Providers;
 
-use App\Models\Member;
-use App\Models\Payment;
-use App\Services\QuotaService;
+use App\Modules\Members\Models\Member;
+use App\Modules\Members\Services\QuotaService;
+use App\Modules\Payments\Models\Payment;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -22,7 +23,21 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('api-login', function (Request $request) {
-            return Limit::perMinute(5)->by($request->ip());
+            $email = strtolower((string) $request->input('email'));
+
+            return [
+                Limit::perMinute(5)->by($request->ip()),
+                Limit::perMinute(5)->by($email),
+            ];
+        });
+
+        RateLimiter::for('admin-login', function (Request $request) {
+            $email = strtolower((string) $request->input('email', $request->ip()));
+
+            return [
+                Limit::perMinute(5)->by($request->ip()),
+                Limit::perMinute(5)->by($request->ip().'|'.$email),
+            ];
         });
 
         JsonResource::withoutWrapping();
@@ -33,6 +48,10 @@ class AppServiceProvider extends ServiceProvider
 
         if (str_starts_with((string) config('app.url'), 'https://')) {
             config(['session.secure' => true]);
+        }
+
+        if (app()->environment('production')) {
+            URL::forceScheme('https');
         }
 
         foreach ([Member::class, Payment::class] as $model) {

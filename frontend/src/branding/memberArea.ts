@@ -16,3 +16,7 @@ export function memberAreaDisabledMessage(branding: ClubBranding): string {
     'A área do sócio não está disponível neste clube. Contacte a secretaria se precisar de ajuda.'
   );
 }
+
+export function arePasskeysEnabled(branding: ClubBranding): boolean {
+  return branding.passkeys_enabled !== false;
+}

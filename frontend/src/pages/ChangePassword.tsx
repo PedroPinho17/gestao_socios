@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { extractErrorMessage } from '../api/client';
+import { extractErrorMessage, setStoredToken } from '../api/client';
 import { changePassword } from '../api/member';
 import { useAuth } from '../auth/AuthContext';
 import { useBranding } from '../branding/BrandingProvider';
@@ -38,7 +38,8 @@ export function ChangePasswordPage() {
     setSubmitting(true);
 
     try {
-      await changePassword(password, passwordConfirmation);
+      const { token } = await changePassword(password, passwordConfirmation);
+      setStoredToken(token);
       await refreshProfile();
       navigate('/area-socio', { replace: true });
     } catch (err) {

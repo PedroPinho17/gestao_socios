@@ -9,6 +9,8 @@ import {
 } from 'react';
 import { clearStoredToken, getStoredToken, setStoredToken } from '../api/client';
 import * as memberApi from '../api/member';
+import * as webauthnApi from '../api/webauthn';
+import { signWithPasskey } from '../lib/webauthn';
 import type { MemberProfile } from '../types';
 
 interface AuthContextValue {
@@ -16,6 +18,7 @@ interface AuthContextValue {
   profile: MemberProfile | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithPasskey: (email: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -71,6 +74,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await refreshProfile();
   }, [refreshProfile]);
 
+  const loginWithPasskey = useCallback(async (email: string) => {
+    const { publicKey } = await webauthnApi.loginOptions(email);
+    const credential = await signWithPasskey(publicKey);
+    const response = await webauthnApi.loginWithPasskey(credential);
+    setStoredToken(response.token);
+    setToken(response.token);
+    setProfile({
+      nome: response.user.nome,
+      numero: response.user.numero,
+      email,
+      must_change_password: response.user.must_change_password,
+      plano: null,
+    });
+    await refreshProfile();
+  }, [refreshProfile]);
+
   const logout = useCallback(async () => {
     try {
       if (token) await memberApi.logout();
@@ -84,8 +103,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   const value = useMemo(
-    () => ({ token, profile, isLoading, login, logout, refreshProfile }),
-    [token, profile, isLoading, login, logout, refreshProfile],
+    () => ({ token, profile, isLoading, login, loginWithPasskey, logout, refreshProfile }),
+    [token, profile, isLoading, login, loginWithPasskey, logout, refreshProfile],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

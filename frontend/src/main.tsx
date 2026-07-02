@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import './pwa/register.ts'
 import App from './App.tsx'
 import { initSentry, Sentry } from './monitoring/sentry.ts'
 

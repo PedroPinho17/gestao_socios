@@ -1,6 +1,15 @@
 {
-  "name": "CRC VALE",
-  "short_name": "CRC VALE",
+  "id": "/",
+  "name": "Área do Sócio",
+  "short_name": "Sócios",
+  "description": "Área reservada aos sócios do clube",
+  "lang": "pt-PT",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -14,8 +23,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }

@@ -18,6 +18,7 @@ const defaultBranding: ClubBranding = {
   accent_color: '#d1fae5',
   member_area_title: 'Área do sócio',
   member_area_login_subtitle: 'Inicie sessão com o email e password do clube.',
+  passkeys_enabled: true,
 };
 
 interface BrandingContextValue {

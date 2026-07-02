@@ -20,11 +20,15 @@ export async function getMe(): Promise<MemberProfile> {
   return data;
 }
 
-export async function changePassword(password: string, passwordConfirmation: string): Promise<void> {
-  await api.put('/me/password', {
+export async function changePassword(
+  password: string,
+  passwordConfirmation: string,
+): Promise<{ token: string }> {
+  const { data } = await api.put<{ message: string; token: string }>('/me/password', {
     password,
     password_confirmation: passwordConfirmation,
   });
+  return { token: data.token };
 }
 
 export async function getQuota(): Promise<QuotaStatusResponse> {

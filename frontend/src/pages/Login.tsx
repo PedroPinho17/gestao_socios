@@ -3,17 +3,20 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { extractErrorMessage } from '../api/client';
 import { useAuth } from '../auth/AuthContext';
 import { useBranding } from '../branding/BrandingProvider';
+import { arePasskeysEnabled } from '../branding/memberArea';
 import { ClubBrandHeader } from '../components/ClubBrandHeader';
 import { PasswordInput } from '../components/PasswordInput';
 
 export function LoginPage() {
-  const { login, token } = useAuth();
+  const { login, loginWithPasskey, token } = useAuth();
   const { branding, isLoading: brandingLoading } = useBranding();
+  const passkeysEnabled = arePasskeysEnabled(branding);
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
 
   if (token) {
     return <Navigate to="/area-socio" replace />;
@@ -31,6 +34,24 @@ export function LoginPage() {
       setError(extractErrorMessage(err));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePasskeyLogin() {
+    setError(null);
+    if (!email.trim()) {
+      setError('Indique o email antes de usar a passkey.');
+      return;
+    }
+
+    setPasskeyLoading(true);
+    try {
+      await loginWithPasskey(email.trim());
+      navigate('/area-socio');
+    } catch (err) {
+      setError(extractErrorMessage(err));
+    } finally {
+      setPasskeyLoading(false);
     }
   }
 
@@ -74,9 +95,26 @@ export function LoginPage() {
               />
             </label>
 
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            <button type="submit" className="btn btn-primary" disabled={loading || passkeyLoading}>
               {loading ? 'A entrar…' : 'Entrar'}
             </button>
+
+            {passkeysEnabled && (
+              <>
+                <div className="login-divider">
+                  <span>ou</span>
+                </div>
+
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  disabled={loading || passkeyLoading}
+                  onClick={handlePasskeyLogin}
+                >
+                  {passkeyLoading ? 'A validar passkey…' : 'Entrar com passkey'}
+                </button>
+              </>
+            )}
           </div>
         </form>
       )}

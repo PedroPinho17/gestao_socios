@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\ClubSetting;
 use App\Support\ModuleRegistry;
+use App\Support\WebauthnSettings;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
@@ -108,6 +109,7 @@ final class ClubBranding
      *     member_area_login_subtitle: string,
      *     modules: array<string, bool>,
      *     member_area_disabled_message: string,
+     *     passkeys_enabled: bool,
      * }
      */
     public static function forMemberArea(): array
@@ -126,6 +128,7 @@ final class ClubBranding
             ),
             'modules' => ModuleRegistry::activeMap(),
             'member_area_disabled_message' => ModuleRegistry::disabledMessage(ModuleRegistry::AREA_SOCIO),
+            'passkeys_enabled' => WebauthnSettings::enabled(),
         ];
     }
 

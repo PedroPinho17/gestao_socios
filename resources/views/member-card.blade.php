@@ -58,7 +58,7 @@
 </head>
 <body>
     <div class="toolbar">
-        <a class="btn-back" href="{{ \App\Filament\Resources\Members\MemberResource::getUrl('edit', ['record' => $member]) }}">← Ficha do sócio</a>
+        <a class="btn-back" href="{{ \App\Modules\Members\Filament\Resources\Members\MemberResource::getUrl('edit', ['record' => $member]) }}">← Ficha do sócio</a>
         <a class="btn-action" href="{{ route('member.card.pdf', $member) }}">PDF (gráfica)</a>
         <a class="btn-secondary" href="{{ route('member.card.png', $member) }}">PNG 300 DPI</a>
         @if (\App\Support\MemberCardLayout::hasVerso($layout))

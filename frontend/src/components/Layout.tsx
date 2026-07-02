@@ -1,11 +1,13 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useBranding } from '../branding/BrandingProvider';
+import { arePasskeysEnabled } from '../branding/memberArea';
 import { ClubLogo } from './ClubLogo';
 
 export function Layout() {
   const { profile, logout } = useAuth();
   const { branding } = useBranding();
+  const passkeysEnabled = arePasskeysEnabled(branding);
 
   return (
     <div className="app-shell">
@@ -30,6 +32,11 @@ export function Layout() {
         <NavLink to="/area-socio/pagamentos" className={({ isActive }) => (isActive ? 'active' : '')}>
           Pagamentos
         </NavLink>
+        {passkeysEnabled && (
+          <NavLink to="/area-socio/passkeys" className={({ isActive }) => (isActive ? 'active' : '')}>
+            Passkeys
+          </NavLink>
+        )}
       </nav>
 
       <main className="app-main">

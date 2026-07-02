@@ -2,34 +2,24 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Clusters\CatalogosCluster;
-use App\Filament\Pages\ChangeRequiredPassword;
-use App\Filament\Pages\ClubSettingsPage;
-use App\Filament\Pages\CommunicationsPage;
-use App\Filament\Pages\Dashboard;
-use App\Filament\Pages\SystemSettingsPage;
-use App\Filament\Resources\ActivityLogs\ActivityLogResource;
-use App\Filament\Resources\Members\MemberResource;
-use App\Filament\Resources\ModuleFeatures\ModuleFeatureResource;
-use App\Filament\Resources\Modules\ModuleResource;
-use App\Filament\Resources\Periodicidades\PeriodicidadeResource;
-use App\Filament\Resources\QuotaPlans\QuotaPlanResource;
-use App\Filament\Resources\TiposVencimentoQuota\TipoVencimentoQuotaResource;
-use App\Filament\Resources\Users\UserResource;
-use App\Filament\Widgets\ClubStatsWidget;
-use App\Filament\Widgets\QuotaAlertsWidget;
 use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Models\AppSetting;
 use App\Models\ClubSetting;
+use App\Modules\Auth\Filament\Pages\Login;
+use App\Modules\Auth\Filament\Pages\ManagePasskeys;
+use App\Modules\Core\Filament\FilamentRegistrar;
 use App\Support\ClubBranding;
+use App\Support\WebauthnSettings;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Icons\Heroicon;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -47,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Login::class)
             ->profile()
             ->multiFactorAuthentication(
                 providers: [AppAuthentication::make()],
@@ -58,8 +48,24 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('auto')
             ->renderHook(
                 PanelsRenderHook::HEAD_START,
-                fn (): string => view('partials.favicon')->render(),
+                fn (): string => view('partials.favicon')->render()
+                    .view('partials.pwa-prompt-capture')->render(),
             )
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): string => view('partials.pwa-install')->render(),
+            )
+            ->renderHook(
+                PanelsRenderHook::SCRIPTS_AFTER,
+                fn (): string => view('partials.pwa-scripts')->render(),
+            )
+            ->userMenuItems([
+                MenuItem::make()
+                    ->label('Passkeys')
+                    ->icon(Heroicon::OutlinedFingerPrint)
+                    ->url(fn (): string => ManagePasskeys::getUrl())
+                    ->visible(fn (): bool => WebauthnSettings::enabled()),
+            ])
             ->spa()
             ->spaUrlExceptions([
                 '/cartao/*',
@@ -70,28 +76,9 @@ class AdminPanelProvider extends PanelProvider
                     once(fn (): string => ClubSetting::current()->panel_primary_color ?? '#10b981'),
                 ),
             ])
-            ->resources([
-                MemberResource::class,
-                QuotaPlanResource::class,
-                ModuleResource::class,
-                ModuleFeatureResource::class,
-                PeriodicidadeResource::class,
-                TipoVencimentoQuotaResource::class,
-                UserResource::class,
-                ActivityLogResource::class,
-            ])
-            ->pages([
-                Dashboard::class,
-                CatalogosCluster::class,
-                CommunicationsPage::class,
-                ClubSettingsPage::class,
-                SystemSettingsPage::class,
-                ChangeRequiredPassword::class,
-            ])
-            ->widgets([
-                ClubStatsWidget::class,
-                QuotaAlertsWidget::class,
-            ])
+            ->resources(FilamentRegistrar::resources())
+            ->pages(FilamentRegistrar::pages())
+            ->widgets(FilamentRegistrar::widgets())
             ->middleware($this->panelMiddleware())
             ->authMiddleware([
                 Authenticate::class,

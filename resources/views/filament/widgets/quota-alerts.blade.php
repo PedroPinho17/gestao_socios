@@ -15,7 +15,7 @@
                             @foreach ($overdue as $row)
                                 <li class="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
                                     <a
-                                        href="{{ \App\Filament\Resources\Members\MemberResource::getUrl('edit', ['record' => $row['id']]) }}"
+                                        href="{{ \App\Modules\Members\Filament\Resources\Members\MemberResource::getUrl('edit', ['record' => $row['id']]) }}"
                                         class="font-medium text-danger-800 hover:underline dark:text-danger-300"
                                     >
                                         {{ $row['nome'] }}
@@ -39,7 +39,7 @@
                             @foreach ($dueSoon as $row)
                                 <li class="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
                                     <a
-                                        href="{{ \App\Filament\Resources\Members\MemberResource::getUrl('edit', ['record' => $row['id']]) }}"
+                                        href="{{ \App\Modules\Members\Filament\Resources\Members\MemberResource::getUrl('edit', ['record' => $row['id']]) }}"
                                         class="font-medium text-warning-900 hover:underline dark:text-warning-200"
                                     >
                                         {{ $row['nome'] }}

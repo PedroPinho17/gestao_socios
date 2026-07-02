@@ -35,4 +35,12 @@ return [
         'printer_name' => env('EVOLIS_PRINTER_NAME'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Validade do link QR de validação (meses)
+    |--------------------------------------------------------------------------
+    */
+
+    'validation_link_ttl_months' => (int) env('MEMBER_CARD_QR_TTL_MONTHS', 12),
+
 ];

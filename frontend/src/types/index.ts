@@ -8,6 +8,7 @@ export interface ClubBranding {
   member_area_title: string;
   member_area_login_subtitle: string;
   member_area_disabled_message?: string;
+  passkeys_enabled?: boolean;
   modules?: Record<string, boolean>;
 }
 

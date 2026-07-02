@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Member;
+use App\Modules\Members\Models\Member;
 use Illuminate\Http\Request;
 
 abstract class Controller

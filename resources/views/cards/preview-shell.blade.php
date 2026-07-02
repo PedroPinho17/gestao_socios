@@ -27,7 +27,7 @@
     </div>
     <p class="card-preview-meta">
         Pré-visualização (CR80 {{ \App\Support\MemberCardDimensions::WIDTH_MM }}×{{ \App\Support\MemberCardDimensions::HEIGHT_MM }} mm)
-        · modelo {{ MemberCardLayout::templateOptions()[$template] ?? $template }}
+        · modelo {{ MemberCardLayout::catalog()[$template]['label'] ?? $template }}
         @if ($hasVerso)
             · frente + verso
             @if ($layout['show_qr_verso'] ?? false)

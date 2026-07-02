@@ -12,6 +12,14 @@
       rel="stylesheet"
     />
     <title>Área do Sócio</title>
+    <script>
+      window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        window.promptEvent = event;
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>

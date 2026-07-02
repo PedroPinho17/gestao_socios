@@ -16,6 +16,8 @@ class ModuleFeature extends Model
         'binding_type',
         'binding_target',
         'is_system',
+        'enabled',
+        'is_core',
         'sort_order',
     ];
 
@@ -26,6 +28,8 @@ class ModuleFeature extends Model
     {
         return [
             'is_system' => 'boolean',
+            'enabled' => 'boolean',
+            'is_core' => 'boolean',
             'sort_order' => 'integer',
         ];
     }
@@ -34,6 +38,44 @@ class ModuleFeature extends Model
     {
         static::saved(fn () => FeatureRegistry::clearCache());
         static::deleted(fn () => FeatureRegistry::clearCache());
+    }
+
+    public function isEffectivelyEnabled(): bool
+    {
+        if (! $this->module?->isEnabled()) {
+            return false;
+        }
+
+        if ($this->is_core) {
+            return true;
+        }
+
+        return $this->enabled;
+    }
+
+    /**
+     * @return array{label: string, color: string}
+     */
+    public function statusBadge(): array
+    {
+        if (! $this->module?->isEnabled()) {
+            return ['label' => 'Módulo desactivado', 'color' => 'gray'];
+        }
+
+        if ($this->is_core) {
+            return ['label' => 'Core', 'color' => 'info'];
+        }
+
+        if (! $this->enabled) {
+            return ['label' => 'Desactivada', 'color' => 'warning'];
+        }
+
+        return ['label' => 'Activada', 'color' => 'success'];
+    }
+
+    public function canToggleEnabled(): bool
+    {
+        return ! $this->is_core && $this->module?->isEnabled();
     }
 
     /**

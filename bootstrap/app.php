@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\EnsureModuleEnabled;
+use App\Modules\Auth\Http\Middleware\EnsureMemberPasswordChanged;
+use App\Modules\Auth\Http\Middleware\EnsurePasskeysEnabled;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,9 +16,23 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->redirectGuestsTo(fn () => route('filament.admin.auth.login'));
+
+        $middleware->trustProxies(at: '*');
+
+        $middleware->web(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
+
+        $middleware->api(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
+
         $middleware->alias([
-            'member.password.changed' => \App\Http\Middleware\EnsureMemberPasswordChanged::class,
-            'module' => \App\Http\Middleware\EnsureModuleEnabled::class,
+            'member.password.changed' => EnsureMemberPasswordChanged::class,
+            'module' => EnsureModuleEnabled::class,
+            'passkeys.enabled' => EnsurePasskeysEnabled::class,
+            'staff' => \App\Http\Middleware\EnsureStaffUser::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

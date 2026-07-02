@@ -90,6 +90,65 @@ Os perfis ficam na tabela `permissoes` (IDs fixos: 1 Imperador, 2 Administrador,
 
 No `.env` só precisa de **APP_KEY** + **DB_*** + **APP_URL** (em produção) + **CORS** (se usar a área do sócio). O resto configura-se no painel após login.
 
+## Módulos e funcionalidades
+
+O sistema tem **dois níveis** de activação, geridos no painel (perfil **Imperador**):
+
+| Nível | Onde | Efeito |
+|-------|------|--------|
+| **Módulo** | Configuração → **Módulos** | Liga ou desliga um pacote inteiro (ex.: Cartões, Comprovativos, Área do sócio). Rotas API/web usam o middleware `module:slug`. |
+| **Funcionalidade** | Configuração → **Funcionalidades** (ou na ficha de cada módulo) | Liga ou desliga páginas, acções ou comandos **dentro** de um módulo já activo. O código usa `FeatureRegistry::enabled('chave')`. |
+
+### Regras
+
+1. Se o **módulo pai** estiver desactivado, todas as funcionalidades desse módulo ficam inactivas (mesmo com o toggle «Activada» ligado).
+2. Funcionalidades marcadas como **core** (ex.: lista de sócios) não podem ser desactivadas — ficam sempre disponíveis enquanto o módulo estiver activo.
+3. Na listagem de funcionalidades, o **badge de estado** mostra claramente quando o módulo está activo mas a funcionalidade foi desactivada («Desactivada», cor de aviso).
+4. O toggle **Activada** na tabela permite ligar/desligar sem abrir a ficha de edição (excepto para funcionalidades core).
+
+### Sincronizar catálogo
+
+Depois de actualizar o código (novos módulos ou funcionalidades definidas em `ModuleRegistry` / `FeatureRegistry`):
+
+```bash
+php artisan migrate
+php artisan gestao:sync-modules
+```
+
+No painel, use **Sincronizar catálogo** em **Módulos** ou **Funcionalidades** para importar entradas novas sem apagar as existentes.
+
+### Estrutura de código por módulo
+
+Cada módulo de domínio em `app/Modules/{Nome}/` contém:
+
+| Pasta | Conteúdo |
+|-------|----------|
+| `Filament/` | Resources, Pages, Widgets e Clusters do painel admin |
+| `Http/Controllers/` | Endpoints HTTP |
+| `Services/` | Regras de negócio |
+| `Models/` | Eloquent |
+| `DTOs/` | Objetos de transferência |
+| `routes.php` | Rotas do módulo (quando aplicável) |
+
+O painel Filament regista automaticamente resources, pages e widgets via `FilamentRegistrar`, que agrega o que cada `*ServiceProvider` expõe em `filamentResources()`, `filamentPages()` e `filamentWidgets()`.
+
+Exemplos:
+
+- `app/Modules/Members/Filament/Resources/Members/MemberResource.php`
+- `app/Modules/Catalogos/Filament/Resources/Periodicidades/PeriodicidadeResource.php`
+- `app/Modules/Settings/Filament/Pages/ClubSettingsPage.php`
+
+### Exemplos de chaves de funcionalidade
+
+| Chave | Uso típico |
+|-------|------------|
+| `filament.members` | Recurso Sócios (core) |
+| `filament.cards` | Cartões, layout em Definições, export ZIP |
+| `filament.receipts` | Comprovativos PDF e envio por email |
+| `filament.reports` | Relatórios PDF/Excel na lista de sócios |
+| `api.area_socio` | Conta de acesso e API da área do sócio |
+| `command.quota_reminders` | Lembretes automáticos de quota |
+
 ## Funcionalidades
 
 ### Backoffice (`/admin`)

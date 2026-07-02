@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Filament\Pages\ChangeRequiredPassword;
+use App\Modules\Core\Filament\Pages\ChangeRequiredPassword;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;

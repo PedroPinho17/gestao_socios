@@ -1,6 +1,14 @@
 {
+  "id": "/admin/",
   "name": "Gestão de Sócios",
-  "short_name": "Sócios",
+  "short_name": "Backoffice",
+  "description": "Backoffice de gestão de sócios",
+  "lang": "pt-PT",
+  "start_url": "/admin",
+  "scope": "/admin/",
+  "display": "standalone",
+  "theme_color": "#0f172a",
+  "background_color": "#0f172a",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -14,8 +22,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "theme_color": "#0f172a",
-  "background_color": "#0f172a",
-  "display": "standalone"
+  ]
 }

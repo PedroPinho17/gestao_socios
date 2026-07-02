@@ -5,9 +5,11 @@ import { RequirePasswordChanged } from './auth/RequirePasswordChanged';
 import { BrandingProvider } from './branding/BrandingProvider';
 import { MemberAreaGate } from './branding/MemberAreaGate';
 import { Layout } from './components/Layout';
+import { PwaInstall } from './components/PwaInstall';
 import { ChangePasswordPage } from './pages/ChangePassword';
 import { DashboardPage } from './pages/Dashboard';
 import { LoginPage } from './pages/Login';
+import { PasskeysPage } from './pages/Passkeys';
 import { PaymentsPage } from './pages/Payments';
 
 export default function App() {
@@ -15,6 +17,7 @@ export default function App() {
     <BrandingProvider>
       <MemberAreaGate>
         <AuthProvider>
+          <PwaInstall />
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<LoginPage />} />
@@ -24,6 +27,7 @@ export default function App() {
                   <Route element={<Layout />}>
                     <Route path="/area-socio" element={<DashboardPage />} />
                     <Route path="/area-socio/pagamentos" element={<PaymentsPage />} />
+                    <Route path="/area-socio/passkeys" element={<PasskeysPage />} />
                   </Route>
                 </Route>
               </Route>
